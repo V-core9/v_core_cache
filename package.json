@@ -2,9 +2,9 @@
   "name": "v_cache",
   "version": "1.0.0",
   "description": "",
-  "main": "jest.config.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,8 @@
   "homepage": "https://github.com/V-core9/v_cache#readme",
   "devDependencies": {
     "jest": "^27.5.1"
+  },
+  "dependencies": {
+    "v_file_system": "^1.0.5"
   }
 }
