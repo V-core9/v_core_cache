@@ -1,12 +1,22 @@
 const v_fs = require('v_file_system');
 
+fixInputExpires = (expires) => {
+  return (expires !== null && isNaN(expires)) ? expires : null;
+};
 
 
 module.exports = function V_Core_Cache(init = {}) {
 
-  this.expires = init.expires || null;
+  this.expires = fixInputExpires(init.expires) || null;
+
+
 
   this.cache = {};
+
+
+  this.expired = expired = async (ttl) => {
+    return (ttl > Date.now() || ttl == false);
+  };
 
 
   this.getAll = list = async () => {
@@ -16,7 +26,7 @@ module.exports = function V_Core_Cache(init = {}) {
 
   this.get = get = async (key = null) => {
     let data = this.cache[key];
-    return (data != undefined) ? ((data.expires > Date.now() || data.expires == false) ? data.value : null) : null;
+    return (data != undefined) ? (await this.expired(data.expires) ? data.value : undefined) : undefined;
   };
 
 
@@ -28,6 +38,12 @@ module.exports = function V_Core_Cache(init = {}) {
     };
     this.cache[key] = data;
     return this.get(key);
+  };
+
+
+  this.has = has = async (key) => {
+    let data = this.cache[key];
+    return (data != undefined) ? await this.expired(data.expires) : false;
   };
 
 
@@ -66,6 +82,7 @@ module.exports = function V_Core_Cache(init = {}) {
     return JSON.stringify(this.cache);
   };
 
+
   this.fromJSON = fromJSON = async (json) => {
     try {
       this.cache = JSON.parse(json);
@@ -96,5 +113,6 @@ module.exports = function V_Core_Cache(init = {}) {
     const data = v_fs.readSy(file);
     return (data !== false) ? this.fromJSON(data) : false;
   };
+
 
 };
