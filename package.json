@@ -1,0 +1,23 @@
+{
+  "name": "v_cache",
+  "version": "1.0.0",
+  "description": "",
+  "main": "jest.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/V-core9/v_cache.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/V-core9/v_cache/issues"
+  },
+  "homepage": "https://github.com/V-core9/v_cache#readme",
+  "devDependencies": {
+    "jest": "^27.5.1"
+  }
+}
