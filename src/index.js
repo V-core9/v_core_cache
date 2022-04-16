@@ -4,6 +4,9 @@ fixInputExpires = (expires) => {
   return (expires !== null && isNaN(expires)) ? expires : null;
 };
 
+expired = async (ttl) => {
+  return (ttl > Date.now() || ttl == false);
+};
 
 module.exports = function V_Core_Cache(init = {}) {
 
@@ -14,11 +17,6 @@ module.exports = function V_Core_Cache(init = {}) {
   this.cache = {};
 
 
-  this.expired = expired = async (ttl) => {
-    return (ttl > Date.now() || ttl == false);
-  };
-
-
   this.getAll = list = async () => {
     return this.cache;
   };
@@ -26,7 +24,7 @@ module.exports = function V_Core_Cache(init = {}) {
 
   this.get = get = async (key = null) => {
     let data = this.cache[key];
-    return (data != undefined) ? (await this.expired(data.expires) ? data.value : undefined) : undefined;
+    return (data != undefined) ? (await expired(data.expires) ? data.value : undefined) : undefined;
   };
 
 
@@ -43,7 +41,7 @@ module.exports = function V_Core_Cache(init = {}) {
 
   this.has = has = async (key) => {
     let data = this.cache[key];
-    return (data != undefined) ? await this.expired(data.expires) : false;
+    return (data != undefined) ? await expired(data.expires) : false;
   };
 
 
@@ -78,9 +76,11 @@ module.exports = function V_Core_Cache(init = {}) {
   };
 
 
+
   this.toJSON = toJSON = () => {
     return JSON.stringify(this.cache);
   };
+
 
 
   this.fromJSON = fromJSON = async (json) => {
@@ -94,9 +94,11 @@ module.exports = function V_Core_Cache(init = {}) {
   };
 
 
+
   this.toString = toString = async () => {
     return this.toJSON();
   };
+
 
 
   this.fromString = fromString = async (string) => {
@@ -104,13 +106,15 @@ module.exports = function V_Core_Cache(init = {}) {
   };
 
 
-  this.toFile = toFile = (file) => {
-    return v_fs.writeSy(file, this.toJSON());
+
+  this.toFile = toFile = (filePath) => {
+    return v_fs.writeSy(filePath, this.toJSON());
   };
 
 
-  this.fromFile = fromFile = (file) => {
-    const data = v_fs.readSy(file);
+
+  this.fromFile = fromFile = (filePath) => {
+    const data = v_fs.readSy(filePath);
     return (data !== false) ? this.fromJSON(data) : false;
   };
 
