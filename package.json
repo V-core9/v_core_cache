@@ -1,7 +1,7 @@
 {
   "name": "v_che",
   "version": "1.0.0",
-  "description": "",
+  "description": "Simple cache",
   "main": "index.js",
   "scripts": {
     "test": "jest",
