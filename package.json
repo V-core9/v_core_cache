@@ -1,7 +1,7 @@
 {
   "name": "v_core_cache",
-  "version": "1.0.0",
-  "description": "Simple cache",
+  "version": "1.0.1",
+  "description": "Simple Node Cache",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -9,15 +9,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/V-core9/v_cache.git"
+    "url": "git+https://github.com/V-core9/v_core_cache.git"
   },
-  "keywords": [],
+  "keywords": [
+    "cache",
+    "node",
+    "v-core9"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/V-core9/v_cache/issues"
+    "url": "https://github.com/V-core9/v_core_cache/issues"
   },
-  "homepage": "https://github.com/V-core9/v_cache#readme",
+  "homepage": "https://github.com/V-core9/v_core_cache#readme",
   "devDependencies": {
     "jest": "^27.5.1"
   },
