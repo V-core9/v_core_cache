@@ -1,10 +1,13 @@
 const v_fs = require('v_file_system');
 
-function V_Core_Cache(init = {}) {
+
+
+module.exports = function V_Core_Cache(init = {}) {
 
   this.expires = init.expires || null;
 
   this.cache = {};
+
 
   this.getAll = list = async () => {
     return this.cache;
@@ -35,35 +38,35 @@ function V_Core_Cache(init = {}) {
 
   this.purge = purge = async () => {
     this.cache = {};
-    return (this.cache == {}) ? true : false;
+    return (this.cache == {});
   };
 
 
-  this.size = async () => {
+  this.size = size = async () => {
     return Object.keys(this.cache).length;
   };
 
 
-  this.keys = async () => {
+  this.keys = keys = async () => {
     return Object.keys(this.cache);
   };
 
 
-  this.values = async () => {
+  this.values = values = async () => {
     return Object.values(this.cache);
   };
 
 
-  this.entries = async () => {
+  this.entries = entries = async () => {
     return Object.entries(this.cache);
   };
 
 
-  this.toJSON = () => {
+  this.toJSON = toJSON = () => {
     return JSON.stringify(this.cache);
   };
 
-  this.fromJSON = async (json) => {
+  this.fromJSON = fromJSON = async (json) => {
     try {
       this.cache = JSON.parse(json);
       return true;
@@ -74,27 +77,24 @@ function V_Core_Cache(init = {}) {
   };
 
 
-  this.toString = async () => {
+  this.toString = toString = async () => {
     return this.toJSON();
   };
 
 
-  this.fromString = async (string) => {
+  this.fromString = fromString = async (string) => {
     return this.fromJSON(string);
   };
 
 
-  this.toFile = (file) => {
+  this.toFile = toFile = (file) => {
     return v_fs.writeSy(file, this.toJSON());
   };
 
 
-  this.fromFile = (file) => {
+  this.fromFile = fromFile = (file) => {
     const data = v_fs.readSy(file);
     return (data !== false) ? this.fromJSON(data) : false;
   };
 
-}
-
-
-module.exports = V_Cache;
+};
