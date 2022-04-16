@@ -1,10 +1,11 @@
 # v_core_cache
 
-### 0. Load
+### 0. Start by...
 
-    const $ = require('v_core_cache');
+    const V_Core_Cache = require('v_core_cache');
+    const $ = new V_Core_Cache();
 
-### 1. Get Item Value
+### 1. Get Item Value 
 
     $.get(key)
 
