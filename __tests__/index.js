@@ -2,8 +2,8 @@ const path = require("path");
 
 const testFile = path.join(__dirname, 'demo.json');
 
-const V_Cache = require('..');
-const cache = new V_Cache();
+const V_Core_Cache = require('..');
+const cache = new V_Core_Cache();
 
 const v_fs = require('v_file_system');
 

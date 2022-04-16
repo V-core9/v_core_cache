@@ -1,6 +1,6 @@
 const v_fs = require('v_file_system');
 
-function V_Cache(init = {}) {
+function V_Core_Cache(init = {}) {
 
   this.expires = init.expires || null;
 

@@ -1,5 +1,5 @@
-const V_Cache = require('..');
-const testCache = new V_Cache();
+const V_Core_Cache = require('..');
+const testCache = new V_Core_Cache();
 
 test("Bunch of items adding/size check/clear", async () => {
 
