@@ -13,8 +13,11 @@ test("Bunch of items adding/size check/clear", async () => {
   let endTS = Date.now();
   let itemPerMS = itemsCount / (endTS - startTS);
 
-  // Test the speed of write to cache. Currently greater than 350 items per ms. [ 350 000 writes per second ]
-  expect(itemPerMS).toBeGreaterThan(350);
+  console.log("Items_Per_MS: " + itemPerMS);
+  // Test the speed of write to cache.
+  // original  : 350 wps
+  // 2022.4.19 : 500 wps
+  expect(itemPerMS).toBeGreaterThan(525);
 
   // Test the size of cache.
   expect(await testCache.size()).toBe(itemsCount);

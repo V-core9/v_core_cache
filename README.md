@@ -32,3 +32,22 @@
 ### 7. Load cache from a file
 
     $.fromFile(filePath)
+
+### 8. Delete cache
+
+    $.purge()
+
+### 9. Delete item from cache
+
+    $.del(key)
+
+### 10. Stats
+
+    $.stats()
+
+### 11. SET Event
+
+    $.on('set', (data) => console.log(data))
+### 12. GET Event
+
+    $.on('get', (data) => console.log(data))
