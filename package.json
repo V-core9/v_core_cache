@@ -1,6 +1,6 @@
 {
   "name": "v_core_cache",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple Node Cache",
   "main": "index.js",
   "scripts": {

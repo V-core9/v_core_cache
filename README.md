@@ -51,3 +51,17 @@
 ### 12. GET Event
 
     $.on('get', (data) => console.log(data))
+
+### 13. HIT Event
+
+    $.on('hit', (data) => console.log(data))
+
+### 14. MISS Event
+
+    $.on('miss', (data) => console.log(data))
+
+### 15. PURGE Event
+
+    $.on('purge', (data) => console.log(data))
+
+    

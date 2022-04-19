@@ -15,28 +15,23 @@ let demoObj = {
   info: false
 };
 
-const delayGet = async (name, delay) => {
+
+
+const delayed = async (name, delay, type) => {
   return new Promise((resolve, reject) => {
     try {
       setTimeout(async () => {
-        resolve(await cache.get(name));
+        resolve(await cache[type](name));
       }, delay);
     } catch (err) {
       reject(err);
     }
   });
 };
-const delayHas = async (name, delay) => {
-  return new Promise((resolve, reject) => {
-    try {
-      setTimeout(async () => {
-        resolve(await cache.has(name));
-      }, delay);
-    } catch (err) {
-      reject(err);
-    }
-  });
-};
+
+const delayHas = async (name, delay) => delayed(name, delay, 'has');
+const delayGet = async (name, delay) => delayed(name, delay, 'get');
+
 
 
 test("main test", async () => {
@@ -74,7 +69,7 @@ test("main test", async () => {
   expect(await cache.has('test_Del')).toBe(false);
   expect(await cache.set('test_Del', `D1110`)).toBe(true);
 
-  console.log(await cache.getAll());
+  //console.log(await cache.getAll());
 
   expect(await cache.size()).toBe(2);
 

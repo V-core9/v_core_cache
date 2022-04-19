@@ -36,17 +36,21 @@ module.exports = class V_Core_Cache extends EventEmitter {
     this.get = async (key = null) => {
       let data = cache[key];
 
+      this.emit('get', data);
+
       if (data === undefined) {
         misses++;
+        this.emit('miss', data);
         return undefined;
       }
 
       if (await alive(data.expires)) {
         hits++;
-        this.emit('get', data);
+        this.emit('hit', data);
         return data.value;
       } else {
         misses++;
+        this.emit('miss', data);
         delete cache[key];
         return undefined;
       }
@@ -76,8 +80,16 @@ module.exports = class V_Core_Cache extends EventEmitter {
 
 
     this.purge = async () => {
+
+      if (await this.size() === 0) {
+        this.emit('purge', false);
+        return false;
+      }
+
       cache = {};
-      return (cache == {});
+      let rez = (await this.size() === 0);
+      this.emit('purge', rez);
+      return rez;
     };
 
 

@@ -6,9 +6,12 @@
   const V_Core_Cache = require('.');
   const cache = new V_Core_Cache();
 
-  cache.on("get", (data) => console.log("GET Event: " + JSON.stringify(data)));
+  cache.on("hit", (data) => console.log("HIT: " + JSON.stringify(data)));
+  cache.on("miss", (data) => console.log("MISS: " + JSON.stringify(data)));
+  cache.on("get", (data) => console.log("GET: " + JSON.stringify(data)));
 
-  cache.on("set", (data) => console.log("SET Event: " + JSON.stringify(data)));
+  cache.on("set", (data) => console.log("SET: " + JSON.stringify(data)));
+  cache.on("purge", (data) => console.log("PURGE: " + JSON.stringify(data)));
 
   // Stats Print => all stats = 0
   console.log(await cache.stats());
@@ -60,6 +63,11 @@
 
     console.log(await cache.get("foo2"));
     console.log(await cache.values());
+
+    console.log(await cache.set("forPurge_1", { name: "yea", age: "2" }, 100));
+    console.log(await cache.set("forPurge_2", "yea"));
+    console.log(await cache.purge());
+    console.log(await cache.purge());
 
   }, 150);
 
