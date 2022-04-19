@@ -14,17 +14,17 @@ alive = async (ttl) => {
 
 
 
-let hits = 0;
-let misses = 0;
-let defaultExpires = null;
-let cache = {};
-
-
-
 
 module.exports = class V_Core_Cache extends EventEmitter {
   constructor(init = {}) {
     super();
+
+
+    let hits = 0;
+    let misses = 0;
+    let defaultExpires = null;
+    let cache = {};
+
 
 
     defaultExpires = fixInputExpires(init.expires) || null;

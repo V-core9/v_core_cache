@@ -5,6 +5,7 @@
 
   const V_Core_Cache = require('.');
   const cache = new V_Core_Cache();
+  const cache2 = new V_Core_Cache();
 
   cache.on("hit", (data) => console.log("HIT: " + JSON.stringify(data)));
   cache.on("miss", (data) => console.log("MISS: " + JSON.stringify(data)));
@@ -37,6 +38,8 @@
 
   // Stats Print => all stats = 1
   console.log(await cache.stats());
+
+  console.log(await cache2.stats());
 
 
   // Print names of items in cache => [ 'foo' ]
