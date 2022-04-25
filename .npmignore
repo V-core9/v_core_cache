@@ -1,7 +1,8 @@
 coverage
 __tests__
-.jshintrc
 .editorconfig
+.gitignore 
+.jshintrc
 jest.config.js
 package-lock.json
-.gitignore 
+jest.config.js
