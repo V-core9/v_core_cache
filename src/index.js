@@ -1,14 +1,13 @@
-const v_fs = require('v_file_system');
 const EventEmitter = require('events');
 
 
 // Fix expires initialization
-fixInputExpires = (expires) => {
+const fixInputExpires = (expires) => {
   return (expires !== null && isNaN(expires)) ? expires : null;
 };
 
 // Check if the item is alive || Not expired yet/ever
-alive = async (ttl) => {
+const alive = async (ttl) => {
   return (ttl > Date.now() || ttl == false);
 };
 
@@ -74,13 +73,9 @@ module.exports = class V_Core_Cache extends EventEmitter {
     };
 
 
-    this.del = async (key) => {
-      return (await this.has(key)) ? delete cache[key] : false;
-    };
-
+    this.del = async (key) => (await this.has(key)) ? delete cache[key] : false;
 
     this.purge = async () => {
-
       if (await this.size() === 0) {
         this.emit('purge', false);
         return false;
@@ -93,26 +88,13 @@ module.exports = class V_Core_Cache extends EventEmitter {
     };
 
 
-    this.keys = async () => {
-      return Object.keys(cache);
-    };
+    this.keys = async () => Object.keys(cache);
 
+    this.values = async () => Object.values(cache);
 
-    this.values = async () => {
-      return Object.values(cache);
-    };
+    this.entries = async () => Object.entries(cache);
 
-
-    this.entries = async () => {
-      return Object.entries(cache);
-    };
-
-
-
-    this.toJSON = () => {
-      return JSON.stringify(cache);
-    };
-
+    this.toJSON = async () => JSON.stringify(cache);
 
 
     this.fromJSON = async (json) => {
@@ -120,7 +102,6 @@ module.exports = class V_Core_Cache extends EventEmitter {
         cache = JSON.parse(json);
         return true;
       } catch (error) {
-        console.log(error);
         return false;
       }
     };
@@ -132,46 +113,19 @@ module.exports = class V_Core_Cache extends EventEmitter {
     };
 
 
-
     this.fromString = async (string) => {
       return this.fromJSON(string);
     };
 
 
     /*
-     * Save cache to file
-     */
-    this.toFile = (filePath) => {
-      return v_fs.writeSy(filePath, this.toJSON());
-    };
-
-
-    /*
-     * Loading the file as cache data
-     */
-    this.fromFile = (filePath) => {
-      const data = v_fs.readSy(filePath);
-      return (data !== false) ? this.fromJSON(data) : false;
-    };
-
-
-    /*
      * Stats
      */
-    this.hits = async () => {
-      return hits;
-    };
+    this.hits = async () => hits;
 
+    this.misses = async () => misses;
 
-    this.misses = async () => {
-      return misses;
-    };
-
-
-    this.size = async () => {
-      return Object.keys(cache).length;
-    };
-
+    this.size = async () => Object.keys(cache).length;
 
     this.stats = async () => {
       return {

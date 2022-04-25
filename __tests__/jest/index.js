@@ -2,10 +2,8 @@ const path = require("path");
 
 const testFile = path.join(__dirname, 'demo.json');
 
-const V_Core_Cache = require('..');
+const V_Core_Cache = require('../..');
 const cache = new V_Core_Cache();
-
-const v_fs = require('v_file_system');
 
 
 
@@ -52,16 +50,6 @@ test("main test", async () => {
   expect(await delayGet('DemoInfo1', 10)).toBe(demoObj);
   expect(await delayGet('DemoInfo1', 500)).toBe(undefined);
 
-
-
-  // Try to load non existing file
-  expect(await cache.fromFile(testFile)).toBe(false);
-  // Save to file
-  expect(await cache.toFile(testFile)).toBe(true);
-  // Load from file
-  expect(await cache.fromFile(testFile)).toBe(true);
-  // Remove the file
-  await v_fs.deleteFile(testFile);
 
   expect(await cache.has('test')).toBe(true);
 

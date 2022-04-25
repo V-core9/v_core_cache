@@ -1,11 +1,12 @@
 {
   "name": "v_core_cache",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Simple Node Cache",
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "prepublish": "npm run test"    
+    "prepack": "npm run test",
+    "webpack_test": "npx webpack --config ./__tests__/webpack/webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -23,9 +24,8 @@
   },
   "homepage": "https://github.com/V-core9/v_core_cache#readme",
   "devDependencies": {
-    "jest": "^27.5.1"
-  },
-  "dependencies": {
-    "v_file_system": "^1.0.5"
+    "jest": "^27.5.1",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
   }
 }
