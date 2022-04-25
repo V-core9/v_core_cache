@@ -1,19 +1,5 @@
-console.log("YEA");
-
 const V_Core_Cache = require('../..');
 const cache = new V_Core_Cache();
-
-// Example Events
-cache.on('hit', (data) => log("hit: ", data));
-
-cache.on('miss', (data) => log("miss: ", data));
-
-cache.on('get', (data) => log("get: ", data));
-
-cache.on('set', (data) => log("set: ", data));
-
-cache.on('purge', (data) => log("purge: ", data));
-
 
 // Debug and Logging
 let debug = true;
@@ -24,21 +10,18 @@ const log = async (...args) => {
   }
 };
 
-
-
+// Example Application
 const actions = {
   changeAppVersion: async () => await cache.set('application_version', document.querySelector('#customVersion').value),
   changeAppTitle: async () => await cache.set('application_title', document.querySelector('#customTitle').value)
 };
 
-// Example Application
 const appHeader = async () => {
   return `<div class='appHeader'>
             <h1>${await cache.get('application_title')}</h1>
             <h2>Version: ${await cache.get('application_version')}</h2>
           </div>`;
 };
-
 
 const changeTitleForm = async () => {
   return `<div class='appHeader'>
@@ -47,7 +30,6 @@ const changeTitleForm = async () => {
             <button action='changeAppTitle'>Change</button>
           </div>`;
 };
-
 
 const changeVersionForm = async () => {
   return `<div class='appHeader'>
@@ -58,18 +40,25 @@ const changeVersionForm = async () => {
 };
 
 
-const app = async () => {
+const app = async (data) => {
   let startTime = Date.now();
-  document.querySelector('v_app').innerHTML = `${await appHeader()}${await changeTitleForm()}${await changeVersionForm()}`;
+  let happened = 'App Render Cache Update';
+  if (data.name === 'appRender') {
+    happened = 'App DOM Update';
+    document.querySelector('v_app').innerHTML = await cache.get("appRender");
+  } else {
+    await cache.set("appRender", `${await appHeader()}${await changeTitleForm()}${await changeVersionForm()}`, 16);
+  }
   let endTime = Date.now() - startTime;
-  log(`App Rendered in ${endTime}ms`);
+  log(`${happened} in ${endTime}ms`);
 };
 
-cache.on('set', async () => await app());
 
 
 // Run the whole thing
 (async () => {
+
+  cache.on('set', app);
 
   window.onclick = async (event) => {
     let action = event.target.getAttribute('action');
@@ -77,14 +66,6 @@ cache.on('set', async () => await app());
       await actions[action]();
     }
   };
-
-  log(await cache.stats());
-
-  log(await cache.set('test', 11));
-
-  log(await cache.get('test'));
-
-  log(await cache.get('missing_key_item'));
 
   await cache.set('application_title', 'V_Core_Cache Example');
   await cache.set('application_version', '1.0.0');

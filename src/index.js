@@ -62,6 +62,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
         expires: (isNaN(expires) || expires == null) ? false : (Date.now() + expires)
       };
       cache[key] = data;
+      data.name = key;
       this.emit('set', data);
       return true;
     };
