@@ -13,7 +13,6 @@ const alive = async (ttl) => {
 
 
 
-
 module.exports = class V_Core_Cache extends EventEmitter {
   constructor(init = {}) {
     super();
@@ -24,6 +23,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
     let defaultExpires = null;
     let cache = {};
 
+    this.count = async () => Object.keys(cache).length;
 
 
     defaultExpires = fixInputExpires(init.expires) || null;
@@ -55,6 +55,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
       }
     };
 
+    this.getExpire = async (key = null) => cache[key].expires || undefined;
 
     this.set = async (key, value, expires = defaultExpires) => {
       let data = {
@@ -77,13 +78,13 @@ module.exports = class V_Core_Cache extends EventEmitter {
     this.del = async (key) => (await this.has(key)) ? delete cache[key] : false;
 
     this.purge = async () => {
-      if (await this.size() === 0) {
+      if (await this.count() === 0) {
         this.emit('purge', false);
         return false;
       }
 
       cache = {};
-      let rez = (await this.size() === 0);
+      let rez = (await this.count() === 0);
       this.emit('purge', rez);
       return rez;
     };
@@ -107,33 +108,33 @@ module.exports = class V_Core_Cache extends EventEmitter {
       }
     };
 
+    this.toString = async () => this.toJSON();
 
-
-    this.toString = async () => {
-      return this.toJSON();
-    };
-
-
-    this.fromString = async (string) => {
-      return this.fromJSON(string);
-    };
+    this.fromString = async (string) => this.fromJSON(string);
 
 
     /*
      * Stats
      */
-    this.hits = async () => hits;
 
-    this.misses = async () => misses;
-
-    this.size = async () => Object.keys(cache).length;
+    this.size = async () => new TextEncoder().encode(JSON.stringify(await this.getAll())).length;
 
     this.stats = async () => {
       return {
-        hits: await this.hits(),
-        misses: await this.misses(),
-        size: await this.size()
+        hits: hits,
+        misses: misses,
+        count: await this.count(),
+        size: await this.size(),
       };
+    };
+
+    this.purgeStats = async () => {
+      hits = 0;
+      misses = 0;
+
+      let stats = await this.stats();
+      this.emit('purge_stats', stats);
+      return stats;
     };
 
   }

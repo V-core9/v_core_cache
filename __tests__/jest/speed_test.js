@@ -1,14 +1,14 @@
 const V_Core_Cache = require('../..');
-const testCache = new V_Core_Cache();
+const cache = new V_Core_Cache();
 
 test("Bunch of items adding/size check/clear", async () => {
 
-  expect(await testCache.size()).toBe(0);
+  expect((await cache.stats()).count).toBe(0);
 
   let startTS = Date.now();
   const itemsCount = 1000000;
   for (let i = 0; i < itemsCount; i++) {
-    await testCache.set(`test${i}`, i);
+    await cache.set(`test${i}`, i);
   }
   let endTS = Date.now();
   let itemPerMS = itemsCount / (endTS - startTS);
@@ -20,9 +20,12 @@ test("Bunch of items adding/size check/clear", async () => {
   expect(itemPerMS).toBeGreaterThan(500);
 
   // Test the size of cache.
-  expect(await testCache.size()).toBe(itemsCount);
+  let stats = await cache.stats();
+  expect(stats.count).toBe(itemsCount);
 
-  await testCache.purge();
-  expect(await testCache.size()).toBe(0);
+  console.log("Items_Size : " + stats.size);
+
+  await cache.purge();
+  expect((await cache.stats()).count).toBe(0);
 
 });

@@ -7,6 +7,7 @@ let items = {
   hit: 0,
   miss: 0,
   purge: 0,
+  purgeStats: 0
 };
 
 testCache.on('hit', (data) => {
@@ -29,9 +30,14 @@ testCache.on('purge', (data) => {
   items.purge++;
 });
 
+testCache.on('purge_stats', (data) => {
+  console.log('<purge_stats - cb>', data);
+  items.purgeStats++;
+});
+
 test("Testing events", async () => {
 
-  expect(await testCache.size()).toBe(0);
+  expect((await testCache.stats()).count).toBe(0);
 
   const itemsCount = 1000000;
   for (let i = 0; i < itemsCount; i++) {
@@ -50,13 +56,22 @@ test("Testing events", async () => {
   expect(items.hit).toBe(itemsCount);
   expect(items.miss).toBe(itemsCount);
 
-  expect(await testCache.size()).toBe(itemsCount);
+  expect((await testCache.stats()).count).toBe(itemsCount);
 
-  expect(await testCache.stats()).toEqual({ hits: items.hit, misses: items.miss, size: itemsCount });
+  let stats = await testCache.stats();
+  expect(stats.hits).toBe(items.hit);
+  expect(stats.misses).toBe(items.miss);
+  expect(stats.count).toBe(itemsCount);
 
   expect(await testCache.purge()).toBe(true);
-  expect(await testCache.size()).toBe(0);
+  expect((await testCache.stats()).count).toBe(0);
 
   expect(items.purge).toBe(1);
+
+  let purgeStats = await testCache.purgeStats();
+  expect(purgeStats.hits).toBe(0);
+  expect(purgeStats.misses).toBe(0);
+
+  expect(items.purgeStats).toBe(1);
 
 });

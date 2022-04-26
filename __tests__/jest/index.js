@@ -1,6 +1,5 @@
 const path = require("path");
 
-const testFile = path.join(__dirname, 'demo.json');
 
 const V_Core_Cache = require('../..');
 const cache = new V_Core_Cache();
@@ -33,7 +32,7 @@ const delayGet = async (name, delay) => delayed(name, delay, 'get');
 
 
 test("main test", async () => {
-  expect(await cache.size()).toBe(0);
+  expect((await cache.stats()).count).toBe(0);
 
   expect(await cache.get('test')).toBe(undefined);
 
@@ -45,7 +44,7 @@ test("main test", async () => {
 
   expect(await cache.set('DemoInfo1', demoObj, 100)).toBe(true);
 
-  expect(await cache.size()).toBe(2);
+  expect((await cache.stats()).count).toBe(2);
 
   expect(await delayGet('DemoInfo1', 10)).toBe(demoObj);
   expect(await delayGet('DemoInfo1', 500)).toBe(undefined);
@@ -59,7 +58,7 @@ test("main test", async () => {
 
   //console.log(await cache.getAll());
 
-  expect(await cache.size()).toBe(2);
+  expect((await cache.stats()).count).toBe(2);
 
 
   expect(await cache.has('test_Del')).toBe(true);
@@ -67,13 +66,22 @@ test("main test", async () => {
 
   expect(await cache.del('test_Del')).toBe(true);
   expect(await cache.get('test_Del')).toBe(undefined);
-  expect(await cache.size()).toBe(1);
+  expect((await cache.stats()).count).toBe(1);
 
 
   expect(await cache.has('test')).toBe(true);
 
-
+  let nowTime = Date.now();
   expect(await cache.set('Demo12345', demoObj, 100)).toBe(true);
+
+  expect(await cache.getExpire('Demo12345')).toBe(nowTime + 100);
+
   expect(await delayHas('Demo12345', 10)).toBe(true);
   expect(await delayHas('Demo12345', 500)).toBe(false);
+
+  const statsPurge = await cache.purgeStats();
+  console.log(statsPurge);
+  expect(statsPurge.count).toBe(2);
+  expect(statsPurge.hits).toBe(0);
+  expect(statsPurge.misses).toBe(0);
 });

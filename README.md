@@ -7,68 +7,88 @@ Simple Cache Solution for Node and Web.
 ### 0. Start by
 
     const V_Core_Cache = require('v_core_cache');
-    const $ = new V_Core_Cache();
+    const cache = new V_Core_Cache();
 
 ### 1. Get Item Value
 
-    $.get(key)
+    cache.get(key)  //> anything you put in
 
 ### 2. Get Whole Cache
 
-    $.getAll(key)
+    cache.getAll(key) //> object - all cache
 
 ### 3. Return Number of items
 
-    $.size()
+    cache.size()  //> 1507114 - approximate in bytes
 
 ### 4. Check if exists
 
-    $.has(key)
+    cache.has(key)   //> true/false
 
 ### 5. Create or update an entry
 
-    $.set(key, data, expires)
+    cache.set(key, data, expires)  //> true/false
 
-### 6. Delete cache
+### 6. Purge cache
 
-    $.purge()
+    cache.purge()   //> true/false
 
 ### 7. Delete item from cache
 
-    $.del(key)
+    cache.del(key)  //> true/false
 
 ### 8. Stats
 
-    $.stats()
+Returns stats about the cache.
 
-### 9. SET Event
+    cache.stats() //> {hits: 56, misses: 5, count: 3, size: 1507114}
 
-    $.on('set', (data) => console.log(data))
+### 9. Purge Stats
 
-### 10. GET Event
+This basically just resets counters for hits and misses.
 
-    $.on('get', (data) => console.log(data))
+    cache.purgeStats()  //> {hits: 0, misses: 0, count: 3, size: 1507114}
 
-### 11. HIT Event
+### 10. Get Item Expire Time
 
-    $.on('hit', (data) => console.log(data))
+Returns the time in milliseconds when the item will expire.
 
-### 12. MISS Event
+    cache.getExpire(key); //> 150123456789 [ Date.now() + expires]
 
-    $.on('miss', (data) => console.log(data))
+## 🎪 Events
 
-### 13. PURGE Event
+### 1. SET
 
-    $.on('purge', (data) => console.log(data))
+    cache.on('set', (data) => console.log(data))
+
+### 2. GET
+
+    cache.on('get', (data) => console.log(data))
+
+### 3. HIT
+
+    cache.on('hit', (data) => console.log(data))
+
+### 4. MISS
+
+    cache.on('miss', (data) => console.log(data))
+
+### 5. PURGE
+
+    cache.on('purge', (data) => console.log(data))
+
+### 6. PURGE_STATS
+
+    cache.on('purge_stats', (data) => console.log(data))
 
 ## ❌ Deleted / Removed  
 
 ### 6. Save cache to a file **[Removed]**
 
-    $.toFile(filePath)
+    cache.toFile(filePath)
 
 ### 7. Load cache from a file **[Removed]**
 
-    $.fromFile(filePath)
+    cache.fromFile(filePath)
 
 > By removing v_file_system it can be used in web applications and **webpack** out of the box.
