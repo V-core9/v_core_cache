@@ -1,5 +1,7 @@
 const V_Core_Cache = require('../..');
-const cache = new V_Core_Cache();
+const dataCache = new V_Core_Cache();
+
+const renderCache = new V_Core_Cache();
 
 // Debug and Logging
 let debug = false;
@@ -14,51 +16,81 @@ const log = async (...args) => {
 
 // Example Application
 const actions = {
-  changeAppVersion: async () => await cache.set('application_version', document.querySelector('#customVersion').value),
-  changeAppTitle: async () => await cache.set('application_title', document.querySelector('#customTitle').value),
-  logStats: async () => log(await cache.stats()),
-  purgeCache: async () => await cache.purge(),
-  purgeCacheStats: async () => await cache.purgeStats(),
-  logAllCache: async () => log(await cache.getAll()),
-  logUndefinedItem: async () => log(await cache.get('logUndefinedItem')),
+  changeAppVersion: async () => await dataCache.set('application_version', document.querySelector('#customVersion').value),
+  changeAppTitle: async () => await dataCache.set('application_title', document.querySelector('#customTitle').value),
+  logStats: async () => log(await dataCache.stats()),
+  purgeCache: async () => await dataCache.purge(),
+  purgeCacheStats: async () => await dataCache.purgeStats(),
+  logAllCache: async () => log(await dataCache.getAll()),
+  logUndefinedItem: async () => log(await dataCache.get('logUndefinedItem')),
 };
 
+
+const cache_stats_box = async () => {
+  let stats = await dataCache.stats();
+  return `<cache_stats_box>
+            <h3>Cache Stats:</h3>
+            <div>
+              <h5>Hits:</h5>
+              <p>${stats.hits}</p>
+            </div>
+            <div>
+              <h5>Misses:</h5>
+              <p>${stats.misses}</p>
+            </div>
+            <div>
+              <h5>Count:</h5>
+              <p>${stats.count}</p>
+            </div>
+            <div>
+              <h5>Size:</h5>
+              <p>${stats.size}</p>
+            </div>
+          </cache_stats_box>`;
+};
+
+
 const app_info = async () => {
-  return `<div>
-            <h1>${await cache.get('application_title')}</h1>
-            <h2>Version: ${await cache.get('application_version')}</h2>
-          </div>`;
+  return `<app_info>
+            <h1>${await dataCache.get('application_title')}</h1>
+            <h2>Version: ${await dataCache.get('application_version')}</h2>
+          </app_info>`;
 };
 
 const change_title_form = async () => {
-  return `<div>
+  return `<change_title_form>
             <h3>Change Application Title:</h3>
-            <input type='text' id='customTitle' placeholder='Change Title to Something' value='${await cache.get('application_title')}' />
-            <button action='changeAppTitle'>Change</button>
-          </div>`;
+            <form_group>
+              <input type='text' id='customTitle' placeholder='Change Title to Something' value='${await dataCache.get('application_title')}' />
+              <button action='changeAppTitle'>Change</button>
+            </form_group>
+          </change_title_form>`;
 };
 
 const change_version_form = async () => {
-  return `<div>
+  return `<change_version_form>
             <h3>Change Application Version:</h3>
-            <input type='text' id='customVersion' placeholder='Change Title to Something' value='${await cache.get('application_version')}' />
-            <button action='changeAppVersion'>Change</button>
-          </div>`;
+            <form_group>
+              <input type='text' id='customVersion' placeholder='Change Title to Something' value='${await dataCache.get('application_version')}' />
+              <button action='changeAppVersion'>Change</button>
+            </form_group>
+          </change_version_form>`;
 };
 
 const cache_actions = async () => {
-  return `<div>
+  return `<cache_actions>
             <h3>Cache Actions:</h3>
             <button action='logUndefinedItem'>Log undefined Item</button>
             <button action='logAllCache'>Log All Cache</button>
             <button action='logStats'>Log Cache Stats</button>
             <button action='purgeCacheStats'>Purge Stats</button>
             <button action='purgeCache'>Purge Cache</button>
-          </div>`;
+          </cache_actions>`;
 };
 
 const renderApp = async () => {
-  return `${await change_title_form()}
+  return `${await cache_stats_box()}
+          ${await change_title_form()}
           ${await change_version_form()}
           ${await cache_actions()}
           ${await app_info()}`;
@@ -67,11 +99,11 @@ const renderApp = async () => {
 const app = async (data) => {
   let startTime = Date.now();
   let happened = 'App Render Cache Update';
-  if (data.name === 'appRender') {
+  if (data.key === 'appRender') {
     happened = 'App DOM Update';
-    document.querySelector('v_app').innerHTML = await cache.get("appRender");
+    document.querySelector('v_app').innerHTML = await renderCache.get("appRender");
   } else {
-    await cache.set("appRender", await renderApp(), 16);
+    await renderCache.set("appRender", await renderApp(), 16);
   }
   let endTime = Date.now() - startTime;
   log(`${happened} in ${endTime}ms`);
@@ -82,14 +114,15 @@ const app = async (data) => {
 // Run the whole thing
 (async () => {
 
-  cache.on('set', app);
+  dataCache.on('set', app);
+  renderCache.on('set', app);
 
-  cache.on('purge', async () => {
+  dataCache.on('purge', async () => {
     log('Cache Purged');
     await app({});
   });
 
-  cache.on('purge_stats', async (data) => {
+  dataCache.on('purge_stats', async (data) => {
     log('purge_stats CB>>', data);
   });
 
@@ -100,12 +133,11 @@ const app = async (data) => {
     }
   };
 
-  await cache.set('application_title', 'V_Core_Cache Example');
-  await cache.set('application_version', '1.0.0');
-
-  for (let i = 0; i < 1000; i++) {
-    await cache.set('item_' + i, 'Item ' + i);
-  }
+  await dataCache.set('application_title', 'V_Core_Cache Example');
+  await dataCache.set('application_version', '1.0.0');
 
   debug = true;
+
+  log("Data Cache: ", await dataCache.getAll());
+  log("Render Cache: ", await renderCache.getAll());
 })();

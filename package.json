@@ -1,7 +1,7 @@
 {
   "name": "v_core_cache",
-  "version": "1.0.7",
-  "description": "Simple Node Cache",
+  "version": "1.0.8",
+  "description": "Simple JavaScript Cache for Node and Web Application.",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -15,10 +15,11 @@
   "keywords": [
     "cache",
     "node",
+    "web",
     "v-core9"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "v-core9",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/V-core9/v_core_cache/issues"
   },

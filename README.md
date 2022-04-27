@@ -59,27 +59,27 @@ Returns the time in milliseconds when the item will expire.
 
 ### 1. SET
 
-    cache.on('set', (data) => console.log(data))
+    cache.on('set', (item) => console.log(item.key, item.value))
 
 ### 2. GET
 
-    cache.on('get', (data) => console.log(data))
+    cache.on('get', (item) => console.log(data)) //> { key, value } - value can be undefined 
 
 ### 3. HIT
 
-    cache.on('hit', (data) => console.log(data))
+    cache.on('hit', (item) => console.log(item)) //> { key, value } 
 
 ### 4. MISS
 
-    cache.on('miss', (data) => console.log(data))
+    cache.on('miss', (item) => console.log(item)) //> { key } 
 
 ### 5. PURGE
 
-    cache.on('purge', (data) => console.log(data))
+    cache.on('purge', (status) => console.log(status)) //> true/false - can return false if already empty
 
 ### 6. PURGE_STATS
 
-    cache.on('purge_stats', (data) => console.log(data))
+    cache.on('purge_stats', (data) => console.log(data)) //> { hits, misses, count, size } - returns stats after purging them.
 
 ## ❌ Deleted / Removed  
 

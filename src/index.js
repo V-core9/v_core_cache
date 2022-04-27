@@ -35,27 +35,29 @@ module.exports = class V_Core_Cache extends EventEmitter {
     this.get = async (key = null) => {
       let data = cache[key];
 
-      this.emit('get', data);
+      let value = (data !== undefined) ? data.value || undefined : undefined;
+
+      this.emit('get', { key, value });
 
       if (data === undefined) {
         misses++;
-        this.emit('miss', data);
+        this.emit('miss', { key: key });
         return undefined;
       }
 
       if (await alive(data.expires)) {
         hits++;
-        this.emit('hit', data);
+        this.emit('hit', { key, value });
         return data.value;
       } else {
         misses++;
-        this.emit('miss', data);
+        this.emit('miss', { key: key });
         delete cache[key];
         return undefined;
       }
     };
 
-    this.getExpire = async (key = null) => cache[key].expires || undefined;
+    this.getExpire = async (key) => cache[key].expires || undefined;
 
     this.set = async (key, value, expires = defaultExpires) => {
       let data = {
@@ -63,8 +65,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
         expires: (isNaN(expires) || expires == null) ? false : (Date.now() + expires)
       };
       cache[key] = data;
-      data.name = key;
-      this.emit('set', data);
+      this.emit('set', { key, value });
       return true;
     };
 
