@@ -1,7 +1,7 @@
 {
   "name": "v_core_cache",
-  "version": "1.0.8",
-  "description": "Simple JavaScript Cache for Node and Web Application.",
+  "version": "1.0.9",
+  "description": "Simple JavaScript Cache with expires/ttl and auto cleanups for Node and Web Application.",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -16,7 +16,12 @@
     "cache",
     "node",
     "web",
-    "v-core9"
+    "v-core9",
+    "caching",
+    "fast",
+    "memory",
+    "caching",
+    "in-memory"
   ],
   "author": "v-core9",
   "license": "MIT",

@@ -1,9 +1,6 @@
-const path = require("path");
-
 
 const V_Core_Cache = require('../..');
 const cache = new V_Core_Cache();
-
 
 
 let demoObj = {
@@ -11,7 +8,6 @@ let demoObj = {
   count: 11,
   info: false
 };
-
 
 
 const delayed = async (name, delay, type) => {

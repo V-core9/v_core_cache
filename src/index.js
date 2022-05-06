@@ -1,143 +1,160 @@
-const EventEmitter = require('events');
+const EventEmitter = require("events");
 
-
-// Fix expires initialization
-const fixInputExpires = (expires) => {
-  return (expires !== null && isNaN(expires)) ? expires : null;
-};
 
 // Check if the item is alive || Not expired yet/ever
-const alive = async (ttl) => {
-  return (ttl > Date.now() || ttl == false);
-};
-
+const alive = (ttl) => ttl === false || ttl > Date.now();
 
 
 module.exports = class V_Core_Cache extends EventEmitter {
   constructor(init = {}) {
     super();
 
-
     let hits = 0;
-    let misses = 0;
-    let defaultExpires = null;
-    let cache = {};
+    let miss = 0;
 
-    this.count = async () => Object.keys(cache).length;
+    const cleanInterval = typeof init.cleanInterval == 'number' ? init.cleanInterval : false;
+    let clInt = null;
 
-
-    defaultExpires = fixInputExpires(init.expires) || null;
-
-
-    this.getAll = async () => cache;
+    let defExp = (init.expires !== null && !isNaN(init.expires) && init.expires > 0) ? init.expires : null;
+    let $ = {};
 
 
+    //* Cache Items Count
+    this.count = async () => Object.keys($).length;
+
+
+    //* All
+    this.getAll = async () => $;
+
+
+    //? Get Item
     this.get = async (key = null) => {
-      let data = cache[key];
+      let data = $[key];
 
-      let value = (data !== undefined) ? data.value || undefined : undefined;
+      let value = data !== undefined ? data.value : undefined;
 
-      this.emit('get', { key, value });
+      this.emit("get", { key, value });
 
-      if (data === undefined) {
-        misses++;
-        this.emit('miss', { key: key });
-        return undefined;
+
+      if (value !== undefined) {
+        if (alive(data.exp)) {
+          hits++;
+          this.emit("hit", { key, value });
+          return value;
+        }
+        delete $[key];
       }
 
-      if (await alive(data.expires)) {
-        hits++;
-        this.emit('hit', { key, value });
-        return data.value;
-      } else {
-        misses++;
-        this.emit('miss', { key: key });
-        delete cache[key];
-        return undefined;
-      }
+      miss++;
+      this.emit("miss", { key: key });
+      return undefined;
+
     };
 
-    this.getExpire = async (key) => cache[key].expires || undefined;
 
-    this.set = async (key, value, expires = defaultExpires) => {
-      let data = {
+    //? Get Item Expire Time
+    this.getExpire = async (key) => $[key].exp || undefined;
+
+
+    //? Set Item Value & Expire Time
+    this.set = async (key, value, exp = defExp) => {
+      $[key] = {
         value: value,
-        expires: (isNaN(expires) || expires == null) ? false : (Date.now() + expires)
+        exp: typeof exp === "number" ? Date.now() + exp : false,
       };
-      cache[key] = data;
-      this.emit('set', { key, value });
+      this.emit("set", { key, value });
       return true;
     };
 
 
+    //? Delete / Remove item from cache
+    this.del = async (key) => ((await this.has(key)) ? delete $[key] : false);
+
+
+    //? Check if has
     this.has = async (key) => {
-      let data = cache[key];
-      return (data != undefined) ? await alive(data.expires) : false;
+      let data = $[key];
+      return data != undefined ? alive(data.exp) : false;
     };
 
 
-    this.del = async (key) => (await this.has(key)) ? delete cache[key] : false;
-
+    //! PURGE Cache
     this.purge = async () => {
-      if (await this.count() === 0) {
-        this.emit('purge', false);
+      if ((await this.count()) === 0) {
+        this.emit("purge", false);
         return false;
       }
 
-      cache = {};
-      let rez = (await this.count() === 0);
-      this.emit('purge', rez);
+      $ = {};
+      let rez = (await this.count()) === 0;
+      this.emit("purge", rez);
       return rez;
     };
 
-
-    this.keys = async () => Object.keys(cache);
-
-    this.values = async () => Object.values(cache);
-
-    this.entries = async () => Object.entries(cache);
-
-    this.toJSON = async () => JSON.stringify(cache);
-
-
-    this.fromJSON = async (json) => {
-      try {
-        cache = JSON.parse(json);
-        return true;
-      } catch (error) {
-        return false;
+    this.cleanup = async () => {
+      let affected = 0;
+      for (let key of await this.keys()) {
+        if (!alive($[key].exp)) {
+          delete $[key];
+          affected++;
+        }
       }
+      return affected;
     };
 
-    this.toString = async () => this.toJSON();
 
-    this.fromString = async (string) => this.fromJSON(string);
-
-
-    /*
-     * Stats
-     */
-
+    //? Size Aproximation
     this.size = async () => new TextEncoder().encode(JSON.stringify(await this.getAll())).length;
 
+
+    //? Stats
     this.stats = async () => {
       return {
         hits: hits,
-        misses: misses,
+        misses: miss,
         count: await this.count(),
         size: await this.size(),
       };
     };
 
+
+    //? PurgeStats
     this.purgeStats = async () => {
       hits = 0;
-      misses = 0;
+      miss = 0;
 
       let stats = await this.stats();
-      this.emit('purge_stats', stats);
+      this.emit("purge_stats", stats);
       return stats;
     };
 
+
+    //? KEYS
+    this.keys = async () => Object.keys($);
+
+
+    //? VALUES
+    this.values = async () => Object.values($);
+
+
+    //? ENTRIES
+    this.entries = async () => Object.entries($);
+
+
+    //! End the cleanup interval looping
+    this.stopCleanup = async () => {
+      if (clInt !== null) {
+        clearInterval(clInt);
+        clInt = null;
+        return true;
+      }
+      return false;
+    };
+
+    //? Start Cleanup Interval if set.
+    if (cleanInterval !== false) {
+      clInt = setInterval(this.cleanup, cleanInterval);
+    }
+
   }
 };
-
