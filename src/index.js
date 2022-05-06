@@ -2,7 +2,7 @@ const EventEmitter = require("events");
 
 
 // Check if the item is alive || Not expired yet/ever
-const alive = (ttl) => ttl === false || ttl > Date.now() ;
+const alive = (ttl) => ttl === false || ttl > Date.now();
 
 
 module.exports = class V_Core_Cache extends EventEmitter {
@@ -11,63 +11,72 @@ module.exports = class V_Core_Cache extends EventEmitter {
 
     let hits = 0;
     let miss = 0;
+
+    const cleanInterval = typeof init.cleanInterval == 'number' ? init.cleanInterval : false;
+    let clInt = null;
+
     let defExp = (init.expires !== null && !isNaN(init.expires) && init.expires > 0) ? init.expires : null;
     let $ = {};
+
 
     //* Cache Items Count
     this.count = async () => Object.keys($).length;
 
+
     //* All
     this.getAll = async () => $;
+
 
     //? Get Item
     this.get = async (key = null) => {
       let data = $[key];
 
-      let value = data !== undefined ? data.value || undefined : undefined;
+      let value = data !== undefined ? data.value : undefined;
 
       this.emit("get", { key, value });
 
-      if (data === undefined) {
-        miss++;
-        this.emit("miss", { key: key });
-        return undefined;
+
+      if (value !== undefined) {
+        if (alive(data.exp)) {
+          hits++;
+          this.emit("hit", { key, value });
+          return value;
+        }
+        delete $[key];
       }
 
-      if (alive(data.exp)) {
-        hits++;
-        this.emit("hit", { key, value });
-        return data.value;
-      } else {
-        miss++;
-        this.emit("miss", { key: key });
-        delete $[key];
-        return undefined;
-      }
+      miss++;
+      this.emit("miss", { key: key });
+      return undefined;
+
     };
+
 
     //? Get Item Expire Time
     this.getExpire = async (key) => $[key].exp || undefined;
+
 
     //? Set Item Value & Expire Time
     this.set = async (key, value, exp = defExp) => {
       $[key] = {
         value: value,
-        exp:
-          isNaN(exp) || exp == null ? false : Date.now() + exp,
+        exp: typeof exp === "number" ? Date.now() + exp : false,
       };
       this.emit("set", { key, value });
       return true;
     };
 
+
     //? Delete / Remove item from cache
     this.del = async (key) => ((await this.has(key)) ? delete $[key] : false);
+
 
     //? Check if has
     this.has = async (key) => {
       let data = $[key];
       return data != undefined ? alive(data.exp) : false;
     };
+
 
     //! PURGE Cache
     this.purge = async () => {
@@ -82,13 +91,23 @@ module.exports = class V_Core_Cache extends EventEmitter {
       return rez;
     };
 
-    //? Size Aproximation
-    this.size = async () =>
-      new TextEncoder().encode(JSON.stringify(await this.getAll())).length;
+    this.cleanup = async () => {
+      let affected = 0;
+      for (let key of await this.keys()) {
+        if (!alive($[key].exp)) {
+          delete $[key];
+          affected++;
+        }
+      }
+      return affected;
+    };
 
-    /*
-     * Stats
-     */
+
+    //? Size Aproximation
+    this.size = async () => new TextEncoder().encode(JSON.stringify(await this.getAll())).length;
+
+
+    //? Stats
     this.stats = async () => {
       return {
         hits: hits,
@@ -98,7 +117,8 @@ module.exports = class V_Core_Cache extends EventEmitter {
       };
     };
 
-    //! PurgeStats
+
+    //? PurgeStats
     this.purgeStats = async () => {
       hits = 0;
       miss = 0;
@@ -108,13 +128,33 @@ module.exports = class V_Core_Cache extends EventEmitter {
       return stats;
     };
 
+
     //? KEYS
     this.keys = async () => Object.keys($);
+
 
     //? VALUES
     this.values = async () => Object.values($);
 
+
     //? ENTRIES
     this.entries = async () => Object.entries($);
+
+
+    //! End the cleanup interval looping
+    this.stopCleanup = async () => {
+      if (clInt !== null) {
+        clearInterval(clInt);
+        clInt = null;
+        return true;
+      }
+      return false;
+    };
+
+    //? Start Cleanup Interval if set.
+    if (cleanInterval !== false) {
+      clInt = setInterval(this.cleanup, cleanInterval);
+    }
+
   }
 };
