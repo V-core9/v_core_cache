@@ -1,5 +1,5 @@
 const V_Core_Cache = require('../..');
-const cache = new V_Core_Cache({ cleanInterval: 100 });
+const cache = new V_Core_Cache({ cleanInterval: 100, expires: 10000 });
 
 
 const delayCount = async (delay) => {
@@ -41,5 +41,7 @@ test('cache', async () => {
   expect(await delayCount(1000)).toBe(1);  // 2250ms after
 
 
-  await cache.stopCleanup();
+  expect(await cache.stopCleanup()).toBe(true);
+  expect(await cache.stopCleanup()).toBe(false);
+
 });
