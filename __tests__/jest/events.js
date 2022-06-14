@@ -64,9 +64,10 @@ test("Testing events", async () => {
   expect(stats.count).toBe(itemsCount);
 
   expect(await testCache.purge()).toBe(true);
+  expect(await testCache.purge()).toBe(false);
   expect((await testCache.stats()).count).toBe(0);
 
-  expect(items.purge).toBe(1);
+  expect(items.purge).toBe(2);
 
   let purgeStats = await testCache.purgeStats();
   expect(purgeStats.hits).toBe(0);
