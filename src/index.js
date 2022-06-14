@@ -4,8 +4,13 @@ const EventEmitter = require("events");
 // Check if the item is alive || Not expired yet/ever
 const alive = (ttl) => ttl === false || ttl > Date.now();
 
+const defineExpire = (expire) => {
+  if (expire === undefined) return false;
+  return (expire !== null && !isNaN(expire) && expire > 0);
+};
 
 module.exports = class V_Core_Cache extends EventEmitter {
+
   constructor(init = {}) {
     super();
 
@@ -15,12 +20,12 @@ module.exports = class V_Core_Cache extends EventEmitter {
     const cleanInterval = typeof init.cleanInterval == 'number' ? init.cleanInterval : false;
     let clInt = null;
 
-    let defExp = (init.expires !== null && !isNaN(init.expires) && init.expires > 0) ? init.expires : null;
-    let $ = {};
+    let defExp = defineExpire(init.expires) ? init.expires : null;
+    let $ = new Map();
 
 
     //* Cache Items Count
-    this.count = async () => Object.keys($).length;
+    this.count = async () => $.size;
 
 
     //* All
@@ -29,7 +34,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
 
     //? Get Item
     this.get = async (key = null) => {
-      let data = $[key];
+      let data = $.get(key);
 
       let value = data !== undefined ? data.value : undefined;
 
@@ -42,7 +47,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
           this.emit("hit", { key, value });
           return value;
         }
-        delete $[key];
+        $.delete(key);
       }
 
       miss++;
@@ -53,27 +58,27 @@ module.exports = class V_Core_Cache extends EventEmitter {
 
 
     //? Get Item Expire Time
-    this.getExpire = async (key) => $[key].exp || undefined;
+    this.getExpire = async (key) => $.has(key) !== false ? $.get(key).exp : undefined;
 
 
     //? Set Item Value & Expire Time
     this.set = async (key, value, exp = defExp) => {
-      $[key] = {
+      $.set(key,{
         value: value,
         exp: typeof exp === "number" ? Date.now() + exp : false,
-      };
+      });
       this.emit("set", { key, value });
       return true;
     };
 
 
     //? Delete / Remove item from cache
-    this.del = async (key) => ((await this.has(key)) ? delete $[key] : false);
+    this.del = async (key) => $.delete(key);
 
 
     //? Check if has
     this.has = async (key) => {
-      let data = $[key];
+      let data = $.get(key);
       return data != undefined ? alive(data.exp) : false;
     };
 
@@ -85,7 +90,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
         return false;
       }
 
-      $ = {};
+      $.clear();
       let rez = (await this.count()) === 0;
       this.emit("purge", rez);
       return rez;
@@ -94,8 +99,8 @@ module.exports = class V_Core_Cache extends EventEmitter {
     this.cleanup = async () => {
       let affected = 0;
       for (let key of await this.keys()) {
-        if (!alive($[key].exp)) {
-          delete $[key];
+        if (!alive($.get(key).exp)) {
+          $.delete(key);
           affected++;
         }
       }
@@ -130,15 +135,15 @@ module.exports = class V_Core_Cache extends EventEmitter {
 
 
     //? KEYS
-    this.keys = async () => Object.keys($);
+    this.keys = async () => $.keys();
 
 
     //? VALUES
-    this.values = async () => Object.values($);
+    this.values = async () => $.values();
 
 
     //? ENTRIES
-    this.entries = async () => Object.entries($);
+    this.entries = async () => $.entries();
 
 
     //! End the cleanup interval looping
@@ -157,4 +162,5 @@ module.exports = class V_Core_Cache extends EventEmitter {
     }
 
   }
+
 };
