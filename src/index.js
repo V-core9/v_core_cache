@@ -9,7 +9,7 @@ const defineExpire = (expire) => {
   return (expire !== null && !isNaN(expire) && expire > 0);
 };
 
-module.exports = class V_Core_Cache extends EventEmitter {
+class V_Core_Cache extends EventEmitter {
 
   constructor(init = {}) {
     super();
@@ -109,7 +109,7 @@ module.exports = class V_Core_Cache extends EventEmitter {
 
 
     //? Size Aproximation
-    this.size = async () => new TextEncoder().encode(JSON.stringify(await this.getAll())).length;
+    this.size = async () => new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length;
 
 
     //? Stats
@@ -164,3 +164,8 @@ module.exports = class V_Core_Cache extends EventEmitter {
   }
 
 };
+
+
+module.exports = V_Core_Cache;
+
+module.exports.default = V_Core_Cache;
