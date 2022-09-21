@@ -4,10 +4,8 @@ const EventEmitter = require("events");
 // Check if the item is alive || Not expired yet/ever
 const alive = (ttl) => ttl === false || ttl > Date.now();
 
-const defineExpire = (expire) => {
-  if (expire === undefined) return false;
-  return (expire !== null && !isNaN(expire) && expire > 0);
-};
+const defineExpire = (expire) => (expire === undefined) ? false : (expire !== null && !isNaN(expire) && expire > 0);
+
 
 class V_Core_Cache extends EventEmitter {
 
@@ -63,7 +61,7 @@ class V_Core_Cache extends EventEmitter {
 
     //? Set Item Value & Expire Time
     this.set = async (key, value, exp = defExp) => {
-      $.set(key,{
+      $.set(key, {
         value: value,
         exp: typeof exp === "number" ? Date.now() + exp : false,
       });
