@@ -1,5 +1,5 @@
 
-const V_Core_Cache = require('../..');
+const { V_Core_Cache } = require('../..');
 const cache = new V_Core_Cache();
 
 
@@ -32,13 +32,13 @@ test("main test", async () => {
 
   expect(await cache.get('test')).toBe(undefined);
 
-  expect(await cache.set('test', 11)).toBe(true);
+  expect(await cache.set({ key: 'test', value: 11 })).toBe(true);
 
   expect(await cache.get('test')).toBe(11);
   expect(await delayGet('test', 1000)).toBe(11);
 
 
-  expect(await cache.set('DemoInfo1', demoObj, 100)).toBe(true);
+  expect(await cache.set({ key: 'DemoInfo1', value: demoObj, exp: 100 })).toBe(true);
 
   expect((await cache.stats()).count).toBe(2);
 
@@ -50,7 +50,7 @@ test("main test", async () => {
 
 
   expect(await cache.has('test_Del')).toBe(false);
-  expect(await cache.set('test_Del', `D1110`)).toBe(true);
+  expect(await cache.set({ key: 'test_Del', value: `D1110` })).toBe(true);
 
   //console.log(await cache.getAll());
 
@@ -68,7 +68,7 @@ test("main test", async () => {
   expect(await cache.has('test')).toBe(true);
 
   let nowTime = Date.now();
-  expect(await cache.set('Demo12345', demoObj, 100)).toBe(true);
+  expect(await cache.set({ key: 'Demo12345', value: demoObj, exp: 100 })).toBe(true);
 
   expect(await cache.getExpire('Demo12345')).toBe(nowTime + 100);
 

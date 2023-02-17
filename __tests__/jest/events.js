@@ -1,4 +1,4 @@
-const V_Core_Cache = require('../..');
+const { V_Core_Cache } = require('../..');
 const testCache = new V_Core_Cache();
 
 let items = {
@@ -41,7 +41,7 @@ test("Testing events", async () => {
 
   const itemsCount = 1000000;
   for (let i = 0; i < itemsCount; i++) {
-    await testCache.set(`test${i}`, i);
+    await testCache.set({ key: `test${i}`, value: i });
   }
 
   expect(items.set).toBe(itemsCount);

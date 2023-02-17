@@ -1,5 +1,5 @@
-const V_Core_Cache = require("../..");
-const cache = new V_Core_Cache();
+import createCache from "../../dist";
+const cache = createCache();
 
 test("Bunch of items adding/size check/clear", async () => {
   expect((await cache.stats()).count).toBe(0);
@@ -9,7 +9,7 @@ test("Bunch of items adding/size check/clear", async () => {
   // WRITE/SET Speed Test
   let startTS = Date.now();
   for (let i = 0; i < itemsCount; i++) {
-    await cache.set(`_${i}`, i);
+    await cache.set({ key: `_${i}`, val: i });
   }
   let endTS = Date.now();
   let itemPerMS = itemsCount / (endTS - startTS);
