@@ -1,8 +1,8 @@
 {
   "name": "v_core_cache",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Simple JavaScript Cache with expires/ttl and auto cleanups for Node and Web Application.",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "test": "jest",
     "prepack": "npm run test",
@@ -34,5 +34,8 @@
     "typescript": "^4.9.4",
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "node-cache": "^5.1.2"
   }
 }

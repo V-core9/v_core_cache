@@ -22,9 +22,9 @@ test('cache', async () => {
   expect(await cache.get('test')).toBe(undefined);
 
 
-  expect(await cache.set({ key: 'test1', value: 1, exp: 1500 })).toBe(true);
-  expect(await cache.set({ key: 'test2', value: 2, exp: 2000 })).toBe(true);
-  expect(await cache.set({ key: 'test3', value: 3, exp: 3000 })).toBe(true);
+  expect(await cache.set('test1', 1, 1500)).toBe(true);
+  expect(await cache.set('test2', 2, 2000)).toBe(true);
+  expect(await cache.set('test3', 3, 3000)).toBe(true);
 
   expect(await cache.count()).toBe(3);
 

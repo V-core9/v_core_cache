@@ -1,6 +1,5 @@
 import { InitProps, CacheItem } from '../index';
-
-const EventEmitter = require("events");
+import { EventEmitter } from 'events';
 
 // Check if the item is alive || Not expired yet/ever
 const alive = (ttl: boolean | number) => ttl === false || ttl > Date.now();
@@ -10,8 +9,30 @@ const defineExpire = (expire: any) => {
   return (expire !== null && !isNaN(expire) && expire > 0);
 };
 
-export class V_Core_Cache extends EventEmitter {
+class V_Core_Cache extends EventEmitter {
   private clInt: any = null;
+  purge: () => Promise<boolean>;
+  count: () => Promise<number>;
+  getAll: () => Promise<Map<any, any>>;
+  get: (key: string | number) => Promise<any>;
+  getSync: (key: string | number) => any;
+  getExpire: (key: string | number) => Promise<any>;
+  set: (key: string | number, value: any, exp?: number) => Promise<boolean>;
+  setSync: (key: string | number, value: any, exp?: number) => boolean;
+  del: (key: string | number) => Promise<boolean>;
+  delSync: (key: any) => boolean;
+  has: (key: string | number) => Promise<boolean>;
+  cleanup: () => Promise<number>;
+  keys: () => Promise<IterableIterator<any>>;
+  size: () => Promise<number>;
+  stats: () => Promise<{ hits: number; misses: number; count: number; size: number; }>;
+  statsSync: () => { hits: number; misses: number; count: number; size: number; };
+  purgeStats: () => Promise<{ hits: number; misses: number; count: number; size: number; }>;
+  values: () => Promise<IterableIterator<any>>;
+  entries: () => Promise<IterableIterator<[any, any]>>;
+  stopCleanup: () => Promise<boolean>;
+  countSync: () => number;
+  sizeSync: () => number;
 
   constructor(init: InitProps = {}) {
     super();
@@ -26,15 +47,16 @@ export class V_Core_Cache extends EventEmitter {
 
 
     //* Cache Items Count
-    this.count = async (): Promise<number> => $.size;
+    this.count = async () => $.size;
+    this.countSync = () => $.size;
 
 
     //* All
-    this.getAll = async (): Promise<Map<any, any>> => $;
+    this.getAll = async () => $;
 
 
     //? Get Item
-    this.get = async (key: string | number = null): Promise<any> => {
+    this.getSync = (key) => {
       let data = $.get(key);
 
       let value = data !== undefined ? data.value : undefined;
@@ -57,13 +79,15 @@ export class V_Core_Cache extends EventEmitter {
 
     };
 
+    this.get = async (key) => this.getSync(key);
+
 
     //? Get Item Expire Time
     this.getExpire = async (key) => $.has(key) !== false ? $.get(key).exp : undefined;
 
 
     //? Set Item Value & Expire Time
-    this.set = async ({ key, value, exp = defExp }: CacheItem) => {
+    this.setSync = (key, value, exp = defExp) => {
       $.set(key, {
         value: value,
         exp: typeof exp === "number" ? Date.now() + exp : false,
@@ -72,13 +96,15 @@ export class V_Core_Cache extends EventEmitter {
       return true;
     };
 
+    this.set = async (key, value, exp = defExp) => this.setSync(key, value, exp);
+
 
     //? Delete / Remove item from cache
-    this.del = async (key: string | number) => $.delete(key);
-
+    this.del = async (key) => $.delete(key);
+    this.delSync = (key) => $.delete(key);
 
     //? Check if has
-    this.has = async (key: string | number) => {
+    this.has = async (key) => {
       let data = $.get(key);
       return data != undefined ? alive(data.exp) : false;
     };
@@ -111,6 +137,7 @@ export class V_Core_Cache extends EventEmitter {
 
     //? Size Aproximation
     this.size = async () => new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length;
+    this.sizeSync = () => new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length;
 
 
     //? Stats
@@ -122,7 +149,14 @@ export class V_Core_Cache extends EventEmitter {
         size: await this.size(),
       };
     };
-
+    this.statsSync = () => {
+      return {
+        hits: hits,
+        misses: miss,
+        count: this.countSync(),
+        size: this.sizeSync(),
+      };
+    };
 
     //? PurgeStats
     this.purgeStats = async () => {
@@ -166,9 +200,6 @@ export class V_Core_Cache extends EventEmitter {
 
 };
 
-
-
-module.exports.default = V_Core_Cache;
 
 const createCache = (props: InitProps): V_Core_Cache => new V_Core_Cache(props);
 
