@@ -1,4 +1,4 @@
-const V_Core_Cache = require('../..');
+const { V_Core_Cache } = require('../../dist/');
 const testCache = new V_Core_Cache();
 
 let items = {
@@ -41,13 +41,13 @@ test("Testing events", async () => {
 
   const itemsCount = 1000000;
   for (let i = 0; i < itemsCount; i++) {
-    await testCache.set(`test${i}`, i);
+    await testCache.set( `test${i}`,i);
   }
 
   expect(items.set).toBe(itemsCount);
 
   for (let i = 0; i < itemsCount * 2; i++) {
-    await testCache.get(`test${i}`, i);
+    await testCache.get(`test${i}`);
   }
 
 

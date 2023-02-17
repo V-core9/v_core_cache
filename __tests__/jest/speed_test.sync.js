@@ -2,25 +2,25 @@ const { createCache } = require("../../dist");
 const cache = createCache();
 
 test("Bunch of items adding/size check/clear", async () => {
-  expect((await cache.stats()).count).toBe(0);
+  expect((cache.statsSync()).count).toBe(0);
 
   const itemsCount = 1000000;
 
   // WRITE/SET Speed Test
   let startTS = Date.now();
   for (let i = 0; i < itemsCount; i++) {
-    await cache.set(`_${i}`, i);
+    cache.setSync(`_${i}`, i);
   }
   let endTS = Date.now();
   let itemPerMS = itemsCount / (endTS - startTS);
 
 
   console.log("SET [write] - Items_Per_MS: " + itemPerMS);
-  expect(itemPerMS).toBeGreaterThan(200);
+  expect(itemPerMS).toBeGreaterThan(450);
 
 
   // Test the size of cache.
-  let stats = await cache.stats();
+  let stats = cache.statsSync();
   expect(stats.count).toBe(itemsCount);
 
   console.log("Items_Size : " + stats.size);
@@ -29,17 +29,17 @@ test("Bunch of items adding/size check/clear", async () => {
   // READ/GET Speed Test
   startTS = Date.now();
   for (let i = 0; i < itemsCount; i++) {
-    await cache.get(`_${i}`);
+    cache.getSync(`_${i}`);
   }
   endTS = Date.now();
   itemPerMS = itemsCount / (endTS - startTS);
 
   console.log("GET [read] - Items_Per_MS: " + itemPerMS);
-  expect(itemPerMS).toBeGreaterThan(200);
+  expect(itemPerMS).toBeGreaterThan(900);
 
 
 
   // Purge to 0
   await cache.purge();
-  expect((await cache.stats()).count).toBe(0);
+  expect((cache.statsSync()).count).toBe(0);
 });

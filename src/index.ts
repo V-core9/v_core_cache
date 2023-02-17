@@ -1,24 +1,46 @@
-const EventEmitter = require("events");
-
+import { InitProps, CacheItem } from '../index';
+import { EventEmitter } from 'events';
 
 // Check if the item is alive || Not expired yet/ever
-const alive = (ttl) => ttl === false || ttl > Date.now();
+const alive = (ttl: boolean | number) => ttl === false || ttl > Date.now();
 
-const defineExpire = (expire) => {
+const defineExpire = (expire: any) => {
   if (expire === undefined) return false;
   return (expire !== null && !isNaN(expire) && expire > 0);
 };
 
 class V_Core_Cache extends EventEmitter {
+  private clInt: any = null;
+  purge: () => Promise<boolean>;
+  count: () => Promise<number>;
+  getAll: () => Promise<Map<any, any>>;
+  get: (key: string | number) => Promise<any>;
+  getSync: (key: string | number) => any;
+  getExpire: (key: string | number) => Promise<any>;
+  set: (key: string | number, value: any, exp?: number) => Promise<boolean>;
+  setSync: (key: string | number, value: any, exp?: number) => boolean;
+  del: (key: string | number) => Promise<boolean>;
+  delSync: (key: any) => boolean;
+  has: (key: string | number) => Promise<boolean>;
+  cleanup: () => Promise<number>;
+  keys: () => Promise<IterableIterator<any>>;
+  size: () => Promise<number>;
+  stats: () => Promise<{ hits: number; misses: number; count: number; size: number; }>;
+  statsSync: () => { hits: number; misses: number; count: number; size: number; };
+  purgeStats: () => Promise<{ hits: number; misses: number; count: number; size: number; }>;
+  values: () => Promise<IterableIterator<any>>;
+  entries: () => Promise<IterableIterator<[any, any]>>;
+  stopCleanup: () => Promise<boolean>;
+  countSync: () => number;
+  sizeSync: () => number;
 
-  constructor(init = {}) {
+  constructor(init: InitProps = {}) {
     super();
 
     let hits = 0;
     let miss = 0;
 
-    const cleanInterval = typeof init.cleanInterval == 'number' ? init.cleanInterval : false;
-    let clInt = null;
+    const cleanInterval = init.cleanInterval || false;
 
     let defExp = defineExpire(init.expires) ? init.expires : null;
     let $ = new Map();
@@ -26,6 +48,7 @@ class V_Core_Cache extends EventEmitter {
 
     //* Cache Items Count
     this.count = async () => $.size;
+    this.countSync = () => $.size;
 
 
     //* All
@@ -33,7 +56,7 @@ class V_Core_Cache extends EventEmitter {
 
 
     //? Get Item
-    this.get = async (key = null) => {
+    this.getSync = (key) => {
       let data = $.get(key);
 
       let value = data !== undefined ? data.value : undefined;
@@ -56,14 +79,16 @@ class V_Core_Cache extends EventEmitter {
 
     };
 
+    this.get = async (key) => this.getSync(key);
+
 
     //? Get Item Expire Time
     this.getExpire = async (key) => $.has(key) !== false ? $.get(key).exp : undefined;
 
 
     //? Set Item Value & Expire Time
-    this.set = async (key, value, exp = defExp) => {
-      $.set(key,{
+    this.setSync = (key, value, exp = defExp) => {
+      $.set(key, {
         value: value,
         exp: typeof exp === "number" ? Date.now() + exp : false,
       });
@@ -71,10 +96,12 @@ class V_Core_Cache extends EventEmitter {
       return true;
     };
 
+    this.set = async (key, value, exp = defExp) => this.setSync(key, value, exp);
+
 
     //? Delete / Remove item from cache
     this.del = async (key) => $.delete(key);
-
+    this.delSync = (key) => $.delete(key);
 
     //? Check if has
     this.has = async (key) => {
@@ -110,6 +137,7 @@ class V_Core_Cache extends EventEmitter {
 
     //? Size Aproximation
     this.size = async () => new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length;
+    this.sizeSync = () => new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length;
 
 
     //? Stats
@@ -121,7 +149,14 @@ class V_Core_Cache extends EventEmitter {
         size: await this.size(),
       };
     };
-
+    this.statsSync = () => {
+      return {
+        hits: hits,
+        misses: miss,
+        count: this.countSync(),
+        size: this.sizeSync(),
+      };
+    };
 
     //? PurgeStats
     this.purgeStats = async () => {
@@ -148,9 +183,9 @@ class V_Core_Cache extends EventEmitter {
 
     //! End the cleanup interval looping
     this.stopCleanup = async () => {
-      if (clInt !== null) {
-        clearInterval(clInt);
-        clInt = null;
+      if (this.clInt !== null) {
+        clearInterval(this.clInt);
+        this.clInt = null;
         return true;
       }
       return false;
@@ -158,7 +193,7 @@ class V_Core_Cache extends EventEmitter {
 
     //? Start Cleanup Interval if set.
     if (cleanInterval !== false) {
-      clInt = setInterval(this.cleanup, cleanInterval);
+      this.clInt = setInterval(this.cleanup, cleanInterval);
     }
 
   }
@@ -166,6 +201,9 @@ class V_Core_Cache extends EventEmitter {
 };
 
 
-module.exports = V_Core_Cache;
+const createCache = (props: InitProps): V_Core_Cache => new V_Core_Cache(props);
 
-module.exports.default = V_Core_Cache;
+module.exports = {
+  V_Core_Cache,
+  createCache,
+}

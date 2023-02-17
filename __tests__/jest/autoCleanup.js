@@ -1,4 +1,4 @@
-const V_Core_Cache = require('../..');
+const { V_Core_Cache } = require('../../dist/');
 const cache = new V_Core_Cache({ cleanInterval: 100, expires: 10000 });
 
 
@@ -22,7 +22,7 @@ test('cache', async () => {
   expect(await cache.get('test')).toBe(undefined);
 
 
-  expect(await cache.set('test1', 1, 1000)).toBe(true);
+  expect(await cache.set('test1', 1, 1500)).toBe(true);
   expect(await cache.set('test2', 2, 2000)).toBe(true);
   expect(await cache.set('test3', 3, 3000)).toBe(true);
 
@@ -37,8 +37,8 @@ test('cache', async () => {
   expect(await delayCount(250)).toBe(3);  // 750ms after
   expect(await delayCount(250)).toBe(3);  // 1000ms after
 
-  expect(await delayCount(250)).toBe(2);   // 1250ms after
-  expect(await delayCount(1000)).toBe(1);  // 2250ms after
+  expect(await delayCount(550)).toBe(2);   // 1550ms after
+  expect(await delayCount(1000)).toBe(1);  // 2550ms after
 
 
   expect(await cache.stopCleanup()).toBe(true);
