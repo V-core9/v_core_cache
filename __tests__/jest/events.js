@@ -1,4 +1,4 @@
-const { V_Core_Cache } = require('../..');
+const { V_Core_Cache } = require('../../dist/');
 const testCache = new V_Core_Cache();
 
 let items = {
