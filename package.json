@@ -5,6 +5,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "test": "jest",
+    "build": "tsc",
     "prepack": "npm run test",
     "webpack_test": "npx webpack --config ./__tests__/webpack/webpack.config.js"
   },
