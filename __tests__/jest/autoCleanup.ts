@@ -1,3 +1,4 @@
+const logger = require("../logger");
 const { V_Core_Cache } = require('../../dist/');
 const cache = new V_Core_Cache({ cleanInterval: 100, expires: 10000 });
 
