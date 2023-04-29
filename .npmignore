@@ -6,5 +6,7 @@ __tests__
 jest.config.js
 package-lock.json
 jest.config.js
+.tryouts
+.github
 
 src
