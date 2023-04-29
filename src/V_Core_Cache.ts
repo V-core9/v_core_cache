@@ -1,3 +1,5 @@
+const { isEmptySync } = require("v_is_empty_value");
+
 import { InitProps, CacheItem } from "../index";
 import { EventEmitter } from "events";
 const { isAlive, defineExpire } = require("./utils");
@@ -100,6 +102,7 @@ export class V_Core_Cache {
 
     //? Set Item Value & Expire Time
     this.setSync = (key, value, exp = defExp) => {
+      if (isEmptySync(value)) return;
       $.set(key, {
         value: value,
         exp: typeof exp === "number" ? Date.now() + exp : false,
@@ -243,4 +246,3 @@ export class V_Core_Cache {
     }
   }
 }
-

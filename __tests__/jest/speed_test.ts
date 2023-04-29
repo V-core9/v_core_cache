@@ -39,4 +39,14 @@ test("Bunch of items adding/size check/clear", async () => {
   // Purge to 0
   await cache.purge();
   expect((await cache.stats()).count).toBe(0);
+
+  //! REJECT Empty Values
+  await cache.set('randomKey', undefined, 50);
+  expect((await cache.stats()).count).toBe(0);
+
+  await cache.set('sdasdasdasd', undefined, 150);
+  expect((await cache.stats()).count).toBe(0);
+
+  await cache.set(123123123, undefined, 250);
+  expect((await cache.stats()).count).toBe(0);
 });

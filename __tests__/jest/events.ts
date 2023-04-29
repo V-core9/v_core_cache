@@ -48,13 +48,13 @@ test("Testing events", async () => {
   expect((await testCache.stats()).count).toBe(0);
 
   const itemsCount = 10000;
-  for (let i = 0; i < itemsCount; i++) {
+  for (let i = 1; i <= itemsCount; i++) {
     await testCache.set(`test${i}`, i);
   }
 
   expect(items.set).toBe(itemsCount);
 
-  for (let i = 0; i < itemsCount * 2; i++) {
+  for (let i = 1; i <= itemsCount * 2; i++) {
     await testCache.get(`test${i}`);
   }
 
