@@ -10,3 +10,7 @@ jest.config.js
 .github
 
 src
+
+tsconfig.json
+README.md
+LICENCE
