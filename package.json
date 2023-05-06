@@ -1,6 +1,6 @@
 {
   "name": "v_core_cache",
-  "version": "1.3.4",
+  "version": "1.4.0",
   "description": "Simple JavaScript Cache with expires/ttl and auto cleanups for Node and Web Application.",
   "main": "./dist/index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/V-core9/v_core_cache.git"
   },
-  "types": "./index.d.ts",
+  "types": "./dts/index.d.ts",
   "keywords": [
     "cache",
     "node",

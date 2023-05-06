@@ -1,4 +1,4 @@
-const V_Core_Cache = require('../..');
+const { V_Core_Cache } = require("../../dist/");
 const dataCache = new V_Core_Cache();
 
 const renderCache = new V_Core_Cache();

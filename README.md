@@ -14,14 +14,20 @@ ___
 
 ## 📑 How to use
 
-    const V_Core_Cache = require('v_core_cache');
+    const { V_Core_Cache } = require('v_core_cache');
     const cache = new V_Core_Cache();
+
+    // OR
+
+    const { createCache } = require('v_core_cache');
+    const cache = createCache();
 
 ## 🚗 Functions and Methods
 
 ### 1. Get Item Value
 
-    cache.get(key)  //> anything you put in
+    await cache.get(key)  //> anything you put in
+    cache.getSync(key)
 
 ### 2. Get Whole Cache
 
@@ -33,7 +39,8 @@ Returns all cache.
 
 Returns the approximate size of the cache in bytes.
 
-    cache.size()  //> 1507114 
+    await cache.size();  //> 1507114 
+    cache.sizeSync();
 
 ### 4. Has Item?
 
@@ -45,17 +52,19 @@ Returns true if the key exists in the cache and is not expired.
 
 Set/Create/Update an item in the cache. Will overwrite existing item.
 
-    cache.set(key, data, expires)  
+    await cache.set(key, data, expires?)
+    cache.setSync(key, data, expires?)  
 
 ### 6. Purge cache
 
 Returns true if cache was successfully purged. Otherwise, returns false if cache is already empty.
 
-    cache.purge()
+    await cache.purge()
 
 ### 7. Delete item from cache
 
-    cache.del(key)  //> true/false
+    await cache.del(key);  //> true/false
+    cache.delSync(key);
 
 ### 8. Stats
 
@@ -79,21 +88,68 @@ Returns the time in milliseconds when the item will expire.
 
 Returns the number of expired items removed.
 
-    cache.cleanup(); 
+    await cache.cleanup(); 
 
 ### 12. Count Items
 
 Returns the number of items in cache.
 
-    cache.count(); 
+    await cache.count();
+    cache.countSync(); 
 
 ___
 
 ## 🎪 Events
 
+## Management
+
+### 1. Add Event Listener
+
+    cache.addListener("set", (data) => console.log(data));
+    // or
+    cache.on("set", (data) => console.log(data));
+
+### 2. Remove Event Listener
+
+    cache.removeListener("set", (data) => console.log(data));
+    // or
+    cache.off("set", (data) => console.log(data));
+
+### 3. Prepend Event Listener
+
+    cache.prependListener("set", (data) => console.log(data));
+    // or
+    cache.pre("set", (data) => console.log(data));
+
+### 4. Get Registered EventNames
+
+    console.log(cache.eventNames());
+
+### 5. Remove All Listeners
+
+Removes all registered listeners for a single event
+
+    cache.removeAllListeners('set')
+
+### 6. Purge All Listeners
+
+Removes all registered listeners for all registered events
+
+    cache.purgeAllListeners()
+
+## Available events
+
 ### 1. SET
 
+Returns {key, value} pair.
+
     cache.on('set', (item) => console.log(item.key, item.value))
+
+### 1.2 set with key
+
+In this case we are returning the value only.
+
+    cache.on('set/{key}', (value) => console.log(value))
 
 ### 2. GET
 
@@ -115,6 +171,24 @@ ___
 
     cache.on('purge_stats', (data) => console.log(data)) //> { hits, misses, count, size } - returns stats after purging them.
 
+### 6. cleanup
+
+returns number of affected items
+
+    cache.on('cleanup', (data) => console.log(data)) //> number 
+
+### 6. addListener
+
+New listener added
+
+    cache.on('addListener', (data) => console.log(data)) 
+
+### 6. removeListener
+
+Removed event listener
+
+    cache.on('addListener', (data) => console.log(data)) 
+
 ___
 
 ## ➰ Auto Cleanup Expired
@@ -126,14 +200,7 @@ ___
 
 ___
 
-## ❌ Deleted / Removed  
 
-### 6. Save cache to a file **[Removed]**
+## **✅ Tests and Coverage with Jest**
 
-    cache.toFile(filePath)
-
-### 7. Load cache from a file **[Removed]**
-
-    cache.fromFile(filePath)
-
-> By removing v_file_system it can be used in web applications and **webpack** out of the box.
+![Test and Coverage with Jest](coverage.png)

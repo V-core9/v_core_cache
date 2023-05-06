@@ -111,7 +111,7 @@ test("Testing events", async () => {
   await testCache.off("miss", miss);
   await testCache.off("removeListener", removeListener);
 
-  expect(Math.trunc((items.removeListener + 1) / 2)).toBe(8);
+  expect(items.removeListener).toBe(8);
 
   expect(await testCache.off(`unknown___key`, removeListener)).toBe(false);
 

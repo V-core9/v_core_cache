@@ -1,24 +1,61 @@
 const { isEmptySync } = require("v_is_empty_value");
-
-import { InitProps, CacheItem } from "../index";
 import { EventEmitter } from "events";
 const { isAlive, defineExpire } = require("./utils");
+
+//? Type Definitions - - - -
+export interface InitProps {
+  cleanInterval?: number;
+  expires?: number;
+}
+
+enum AddRemoveEventGeneratorEnum {
+  Add = "addListener",
+  Remove = "removeListener",
+  Prepend = "prependListener",
+}
+
+type CacheItemIdentifier = string | number;
+
+type CacheItemSpread = [
+  key: CacheItemIdentifier, // cache item key
+  value: any, // value to cache
+  exp: number | undefined // expires in milliseconds
+];
+
+type EventManager = (evName: string, evCb: () => void) => void;
+//! Type Definitions - - - - -
+
+const createHandleAddRemoveEvent =
+  (ev: AddRemoveEventGeneratorEnum, emitter: EventEmitter) =>
+  (eventName, evCallback) => {
+    if (!eventName || !evCallback) return false;
+    if (
+      ev === AddRemoveEventGeneratorEnum.Add ||
+      eventName === AddRemoveEventGeneratorEnum.Remove
+    )
+      emitter.emit(ev, { eventName, evCallback });
+    if (ev === AddRemoveEventGeneratorEnum.Remove) {
+      if (emitter.eventNames().indexOf(eventName) === -1) return false;
+    }
+    const evR = emitter[ev](eventName, evCallback);
+    return !!evR;
+  };
 
 export class V_Core_Cache {
   private clInt: any = null;
   purge: () => Promise<boolean>;
   count: () => Promise<number>;
+  set: (...item: CacheItemSpread) => Promise<boolean>;
+  setSync: (...item: CacheItemSpread) => boolean;
   getAll: () => Promise<Map<any, any>>;
-  get: (key: string | number) => Promise<any>;
-  getSync: (key: string | number) => any;
-  getExpire: (key: string | number) => Promise<any>;
-  set: (key: string | number, value: any, exp?: number) => Promise<boolean>;
-  setSync: (key: string | number, value: any, exp?: number) => boolean;
-  del: (key: string | number) => Promise<boolean>;
-  delSync: (key: any) => boolean;
-  has: (key: string | number) => Promise<boolean>;
+  get: (key: CacheItemIdentifier) => Promise<any>;
+  getSync: (key: CacheItemIdentifier) => any;
+  getExpire: (key: CacheItemIdentifier) => Promise<any>;
+  del: (key: CacheItemIdentifier) => Promise<boolean>;
+  delSync: (key: CacheItemIdentifier) => boolean;
+  has: (key: CacheItemIdentifier) => Promise<boolean>;
   cleanup: () => Promise<number>;
-  keys: () => Promise<IterableIterator<any>>;
+  keys: () => IterableIterator<any>;
   size: () => Promise<number>;
   stats: () => Promise<{
     hits: number;
@@ -38,13 +75,19 @@ export class V_Core_Cache {
     count: number;
     size: number;
   }>;
-  values: () => Promise<IterableIterator<any>>;
-  entries: () => Promise<IterableIterator<[any, any]>>;
-  on: (evName: string, evCb: () => void) => void;
-  addListener: (evName: string, evCb: () => void) => void;
-  removeListener: (evName: string, evCb: () => void) => void;
-  off: (evName: string, evCb: () => void) => void;
-  stopCleanup: () => Promise<boolean>;
+  values: () => IterableIterator<any>;
+  entries: () => IterableIterator<[any, any]>;
+
+  //? Events Management - - - - -
+  addListener: EventManager;
+  prependListener: EventManager;
+  removeListener: EventManager;
+  on: EventManager;
+  pre: EventManager;
+  off: EventManager;
+  //! Events Management - - - - -
+
+  stopCleanup: () => boolean;
   countSync: () => number;
   sizeSync: () => number;
   eventNames: () => (string | symbol)[];
@@ -90,7 +133,7 @@ export class V_Core_Cache {
       }
 
       miss++;
-      emitter.emit("miss", { key: key });
+      emitter.emit("miss", { key });
       return undefined;
     };
 
@@ -102,7 +145,7 @@ export class V_Core_Cache {
 
     //? Set Item Value & Expire Time
     this.setSync = (key, value, exp = defExp) => {
-      if (isEmptySync(value)) return;
+      if (isEmptySync(value)) return false;
       $.set(key, {
         value: value,
         exp: typeof exp === "number" ? Date.now() + exp : false,
@@ -127,20 +170,20 @@ export class V_Core_Cache {
 
     //! PURGE Cache
     this.purge = async () => {
-      if ((await this.count()) === 0) {
+      if ($.size === 0) {
         emitter.emit("purge", false);
         return false;
       }
 
       $.clear();
-      let rez = (await this.count()) === 0;
+      let rez = $.size === 0;
       emitter.emit("purge", rez);
       return rez;
     };
 
     this.cleanup = async () => {
       let affected = 0;
-      for (let key of await this.keys()) {
+      for (let key of this.keys()) {
         if (!isAlive($.get(key).exp)) {
           $.delete(key);
           affected++;
@@ -161,7 +204,7 @@ export class V_Core_Cache {
       return {
         hits: hits,
         misses: miss,
-        count: await this.count(),
+        count: $.size,
         size: await this.size(),
       };
     };
@@ -170,7 +213,7 @@ export class V_Core_Cache {
       return {
         hits: hits,
         misses: miss,
-        count: this.countSync(),
+        count: $.size,
         size: this.sizeSync(),
       };
     };
@@ -186,36 +229,36 @@ export class V_Core_Cache {
     };
 
     //? KEYS
-    this.keys = async () => $.keys();
+    this.keys = () => $.keys();
 
     //? VALUES
-    this.values = async () => $.values();
+    this.values = () => $.values();
 
     //? ENTRIES
-    this.entries = async () => $.entries();
+    this.entries = () => $.entries();
 
     //* Add Event Listener
-    this.addListener = (eventName, evCallback) => {
-      if (!eventName || !evCallback) return false;
-      const evE = emitter.emit("addListener", { eventName, evCallback });
-      const evR = emitter.addListener(eventName, evCallback);
-      return !evE && !evR;
-    };
-    //* [alias] this.on -> this.addListener
-    this.on = this.addListener;
-
+    this.addListener = createHandleAddRemoveEvent(
+      AddRemoveEventGeneratorEnum.Add,
+      emitter
+    );
     //* Remove Event Listener
-    this.removeListener = async (eventName, evCallback) => {
-      if (!eventName || !evCallback) return false;
-      const evE = emitter.emit("removeListener", { eventName, evCallback });
-      const evR = emitter.removeListener(eventName, evCallback);
-      return !evE && !evR;
-    };
-    //* [alias] this.off -> this.removeListener
+    this.removeListener = createHandleAddRemoveEvent(
+      AddRemoveEventGeneratorEnum.Remove,
+      emitter
+    );
+    this.prependListener = createHandleAddRemoveEvent(
+      AddRemoveEventGeneratorEnum.Prepend,
+      emitter
+    );
+
+    //? Aliases
+    this.on = this.addListener;
     this.off = this.removeListener;
+    this.pre = this.prependListener;
 
     //! End the cleanup interval looping
-    this.stopCleanup = async () => {
+    this.stopCleanup = () => {
       if (this.clInt !== null) {
         clearInterval(this.clInt);
         this.clInt = null;
