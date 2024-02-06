@@ -1,0 +1,37 @@
+{
+  "root": true,
+
+  "ignorePatterns": [
+    "node_modules/**/*",
+    "**/node_modules/**",
+    "**/__tests__/**",
+    "**/dist/**",
+    "**/__tests__/**",
+    "**/rollup.config.js",
+    "**/*.test.*",
+    "**/*/*.test.*"
+  ],
+
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+
+  "extends": "eslint:recommended",
+
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+
+  "rules": {
+    "indent": ["warn", 2],
+    "linebreak-style": ["error", "unix"],
+    "semi": ["error", "never"],
+    "eol-last": ["warn"],
+    "quotes": ["error", "single"],
+    "avoidEscape": ["off", 2],
+    "allowTemplateLiterals": ["off", 2]
+  }
+}
