@@ -17,16 +17,15 @@ export class V_Core_Cache {
     let defExp = defineExpire(init.expires) ? init.expires : null
     let $ = new Map()
 
+    this.entries =  $.entries
+    this.keys = () => $.keys()
+    this.values = () => $.values()
+    this.del = (key) => $.delete(key)
+    this.count = () => $.size
 
-    //* Cache Items Count
-    this.count = async () => $.size
-    this.countSync = () => $.size
+    this.getAll = () => $
 
-    //* All
-    this.getAll = async () => $
-
-    //? Get Item
-    this.getSync = (key) => {
+    this.get = (key) => {
       let data = $.get(key)
 
       let value = data !== undefined ? data.value : undefined
@@ -47,13 +46,9 @@ export class V_Core_Cache {
       return undefined
     }
 
-    this.get = async (key) => this.getSync(key)
+    this.getExpire = (key) => ($.has(key) !== false ? $.get(key).exp : undefined)
 
-    //? Get Item Expire Time
-    this.getExpire = async (key) => ($.has(key) !== false ? $.get(key).exp : undefined)
-
-    //? Set Item Value & Expire Time
-    this.setSync = (key, value, exp = defExp) => {
+    this.set = (key, value, exp = defExp) => {
       if (isEmpty(value)) return false
       $.set(key, {
         value: value,
@@ -64,20 +59,12 @@ export class V_Core_Cache {
       return true
     }
 
-    this.set = async (key, value, exp = defExp) => this.setSync(key, value, exp)
-
-    //? Delete / Remove item from cache
-    this.del = async (key) => $.delete(key)
-    this.delSync = (key) => $.delete(key)
-
-    //? Check if has
-    this.has = async (key) => {
+    this.has = (key) => {
       let data = $.get(key)
       return data != undefined ? isAlive(data.exp) : false
     }
 
-    //! PURGE Cache
-    this.purge = async () => {
+    this.purge = () => {
       if ($.size === 0) {
         emitter.emit('purge', false)
         return false
@@ -89,7 +76,7 @@ export class V_Core_Cache {
       return rez
     }
 
-    this.cleanup = async () => {
+    this.cleanup = () => {
       let affected = 0
       for (let key of this.keys()) {
         if (!isAlive($.get(key).exp)) {
@@ -101,48 +88,23 @@ export class V_Core_Cache {
       return affected
     }
 
-    //? Size Aproximation
-    this.sizeSync = () => new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length
-    this.size = async () => this.sizeSync()
+    this.size = () => new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length
 
-    //? Stats
-    //*> ASYNC
-    this.stats = async () => {
-      return {
-        hits: hits,
-        misses: miss,
-        count: $.size,
-        size: await this.size()
-      }
-    }
-    //*> SYNC
-    this.statsSync = () => {
-      return {
-        hits: hits,
-        misses: miss,
-        count: $.size,
-        size: this.sizeSync()
-      }
-    }
+    this.stats = () => ({
+      hits: hits,
+      misses: miss,
+      count: $.size,
+      size: this.size()
+    })
 
-    //? PurgeStats
-    this.purgeStats = async () => {
+    this.purgeStats = () => {
       hits = 0
       miss = 0
 
-      let stats = await this.stats()
+      let stats = this.stats()
       emitter.emit('purgeStats', stats)
       return stats
     }
-
-    //? KEYS
-    this.keys = () => $.keys()
-
-    //? VALUES
-    this.values = $.values
-
-    //? ENTRIES
-    this.entries = $.entries
 
     //* Create Event Listener
     this.addListener = makeEvHandler(Add_Listener, emitter)

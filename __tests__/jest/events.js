@@ -35,7 +35,7 @@ const purge = (data) => items.purge++
 //? 8.
 const removeListener = (data) => items.removeListener++
 
-test('Testing events', async () => {
+test('Testing events', () => {
   testCache.on('addListener', addListener)
   testCache.on('removeListener', removeListener)
   testCache.on('purgeStats', purgeStats)
@@ -45,17 +45,17 @@ test('Testing events', async () => {
   testCache.on('hit', hit)
   testCache.on('miss', miss)
 
-  expect((await testCache.stats()).count).toBe(0)
+  expect(testCache.stats().count).toBe(0)
 
   const itemsCount = 10000
   for (let i = 1; i <= itemsCount; i++) {
-    await testCache.set(`test${i}`, i)
+    testCache.set(`test${i}`, i)
   }
 
   expect(items.set).toBe(itemsCount)
 
   for (let i = 1; i <= itemsCount * 2; i++) {
-    await testCache.get(`test${i}`)
+    testCache.get(`test${i}`)
   }
 
   logger(items)
@@ -65,20 +65,20 @@ test('Testing events', async () => {
   expect(items.hit).toBe(itemsCount)
   expect(items.miss).toBe(itemsCount)
 
-  expect((await testCache.stats()).count).toBe(itemsCount)
+  expect(testCache.stats().count).toBe(itemsCount)
 
-  let stats = await testCache.stats()
+  let stats = testCache.stats()
   expect(stats.hits).toBe(items.hit)
   expect(stats.misses).toBe(items.miss)
   expect(stats.count).toBe(itemsCount)
 
-  expect(await testCache.purge()).toBe(true)
-  expect(await testCache.purge()).toBe(false)
-  expect((await testCache.stats()).count).toBe(0)
+  expect(testCache.purge()).toBe(true)
+  expect(testCache.purge()).toBe(false)
+  expect(testCache.stats().count).toBe(0)
 
   expect(items.purge).toBe(2)
 
-  let purgeStatsData = await testCache.purgeStats()
+  let purgeStatsData = testCache.purgeStats()
   expect(purgeStatsData.hits).toBe(0)
   expect(purgeStatsData.misses).toBe(0)
 
@@ -90,7 +90,7 @@ test('Testing events', async () => {
   })
 
   for (let i = 1; i <= 125; i += 1) {
-    await testCache.set(testKeyName, {
+    testCache.set(testKeyName, {
       nmb: Math.trunc(Math.random() * 1000000),
       txt: (Math.random() + 1).toString(36)
     })
@@ -98,26 +98,26 @@ test('Testing events', async () => {
 
   expect(items.specificEventSet).toBe(125)
 
-  expect((await testCache.eventNames()).length).toBe(9)
+  expect(testCache.eventNames().length).toBe(9)
   //- - - - - - - - - - - - - - - - - - - - -
   // Test: OFF / Remove Listener - - - - -
 
-  await testCache.off('addListener', addListener)
-  await testCache.off('purgeStats', purgeStats)
-  await testCache.off('purge', purge)
-  await testCache.off('set', set)
-  await testCache.off('get', get)
-  await testCache.off('hit', hit)
-  await testCache.off('miss', miss)
-  await testCache.off('removeListener', removeListener)
+  testCache.off('addListener', addListener)
+  testCache.off('purgeStats', purgeStats)
+  testCache.off('purge', purge)
+  testCache.off('set', set)
+  testCache.off('get', get)
+  testCache.off('hit', hit)
+  testCache.off('miss', miss)
+  testCache.off('removeListener', removeListener)
 
   expect(items.removeListener).toBe(8)
 
-  expect(await testCache.off(`unknown___key`, removeListener)).toBe(false)
+  expect(testCache.off(`unknown___key`, removeListener)).toBe(false)
 
-  expect(await testCache.off(`unknown___id_key`, miss)).toBe(false)
+  expect(testCache.off(`unknown___id_key`, miss)).toBe(false)
 
-  expect(await testCache.off(/'XX'/, null)).toBe(false)
+  expect(testCache.off(/'XX'/, null)).toBe(false)
 
-  expect(await testCache.purgeAllListeners()).toBe(true)
+  expect(testCache.purgeAllListeners()).toBe(true)
 })

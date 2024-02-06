@@ -9,11 +9,11 @@ let demoObj = {
   info: false
 }
 
-const delayed = async (name, delay, type) => {
+const delayed = (name, delay, type) => {
   return new Promise((resolve, reject) => {
     try {
       setTimeout(async () => {
-        resolve(await cache[type](name))
+        resolve(cache[type](name))
       }, delay)
     } catch (err) {
       reject(err)
@@ -21,57 +21,57 @@ const delayed = async (name, delay, type) => {
   })
 }
 
-const delayHas = async (name, delay) => delayed(name, delay, 'has')
-const delayGet = async (name, delay) => delayed(name, delay, 'get')
+const delayHas = (name, delay) => delayed(name, delay, 'has')
+const delayGet = (name, delay) => delayed(name, delay, 'get')
 
 test('main test', async () => {
-  expect((await cache.stats()).count).toBe(0)
+  expect(cache.stats().count).toBe(0)
 
-  expect(await cache.get('test')).toBe(undefined)
+  expect(cache.get('test')).toBe(undefined)
 
-  expect(await cache.set('test', 11)).toBe(true)
+  expect(cache.set('test', 11)).toBe(true)
 
-  expect(await cache.get('test')).toBe(11)
+  expect(cache.get('test')).toBe(11)
   expect(await delayGet('test', 1000)).toBe(11)
 
-  expect(await cache.set('DemoInfo1', demoObj, 100)).toBe(true)
+  expect(cache.set('DemoInfo1', demoObj, 100)).toBe(true)
 
-  expect((await cache.stats()).count).toBe(2)
+  expect(cache.stats().count).toBe(2)
 
   expect(await delayGet('DemoInfo1', 10)).toBe(demoObj)
   expect(await delayGet('DemoInfo1', 500)).toBe(undefined)
 
-  expect(await cache.has('test')).toBe(true)
+  expect(cache.has('test')).toBe(true)
 
-  expect(await cache.has('test_Del')).toBe(false)
-  expect(await cache.set('test_Del', `D1110`)).toBe(true)
+  expect(cache.has('test_Del')).toBe(false)
+  expect(cache.set('test_Del', `D1110`)).toBe(true)
 
-  logger(await cache.getAll())
+  logger(cache.getAll())
 
-  expect((await cache.stats()).count).toBe(2)
+  expect(cache.stats().count).toBe(2)
 
-  expect(await cache.has('test_Del')).toBe(true)
-  expect(await cache.get('test_Del')).toBe(`D1110`)
+  expect(cache.has('test_Del')).toBe(true)
+  expect(cache.get('test_Del')).toBe(`D1110`)
 
-  expect(await cache.del('test_Del')).toBe(true)
-  expect(await cache.get('test_Del')).toBe(undefined)
-  expect((await cache.stats()).count).toBe(1)
+  expect(cache.del('test_Del')).toBe(true)
+  expect(cache.get('test_Del')).toBe(undefined)
+  expect(cache.stats().count).toBe(1)
 
-  expect(await cache.set('test_Del', `D1110`)).toBe(true)
-  expect(cache.delSync('test_Del')).toBe(true)
+  expect(cache.set('test_Del', `D1110`)).toBe(true)
+  expect(cache.del('test_Del')).toBe(true)
 
-  expect(await cache.has('test')).toBe(true)
+  expect(cache.has('test')).toBe(true)
 
   let nowTime = Date.now()
-  expect(await cache.set('Demo12345', demoObj, 100)).toBe(true)
+  expect(cache.set('Demo12345', demoObj, 100)).toBe(true)
 
-  expect(await cache.getExpire('Demo12345')).toBe(nowTime + 100)
-  expect(await cache.getExpire()).toBe(undefined)
+  expect(cache.getExpire('Demo12345')).toBe(nowTime + 100)
+  expect(cache.getExpire()).toBe(undefined)
 
   expect(await delayHas('Demo12345', 10)).toBe(true)
   expect(await delayHas('Demo12345', 500)).toBe(false)
 
-  const statsPurge = await cache.purgeStats()
+  const statsPurge = cache.purgeStats()
   logger(statsPurge)
   expect(statsPurge.count).toBe(2)
   expect(statsPurge.hits).toBe(0)
