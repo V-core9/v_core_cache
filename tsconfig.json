@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
+    //? Auto Type Declaration
+    //"declaration": false,
+    //"declarationMap": true,
+    //"declarationDir": "dts",
+
     //"strict": true,
     "outDir": "./dist/",
-    "sourceMap": true,
+    "sourceMap": false,
     "noImplicitAny": false,
     "module": "CommonJS",
-    "target": "ES2022",
-    "declaration": true,
-    "declarationMap": true,
-    "declarationDir": "dts"
+    "target": "es2015"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]

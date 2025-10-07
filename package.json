@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/V-core9/v_core_cache.git"
   },
-  "types": "./dts/index.d.ts",
+  "types": "./index.d.ts",
   "keywords": [
     "cache",
     "node",

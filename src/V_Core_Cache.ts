@@ -8,23 +8,31 @@ export interface InitProps {
   expires?: number;
 }
 
-enum AddRemoveEventGeneratorEnum {
+export enum AddRemoveEventGeneratorEnum {
   Add = "addListener",
   Remove = "removeListener",
   Prepend = "prependListener",
 }
 
-type CacheItemIdentifier = string | number;
+export type CacheItemIdentifier = string | number;
 
-type CacheItemSpread = [
+export type CacheItemSpread = [
   key: CacheItemIdentifier, // cache item key
   value: any, // value to cache
   exp: number | undefined // expires in milliseconds
 ];
 
-type EventManager = (evName: string, evCb: () => void) => void;
-//! Type Definitions - - - - -
+export type EventManager = (evName: string, evCb: () => void) => void;
 
+export interface StatsInterface {
+  hits: number;
+  misses: number;
+  count: number;
+  size: number;
+}
+//! EOF: Type Definitions - - - - -
+
+//? Helpers - - - - - - - - - -
 const createHandleAddRemoveEvent =
   (ev: AddRemoveEventGeneratorEnum, emitter: EventEmitter) =>
   (eventName, evCallback) => {
@@ -40,8 +48,9 @@ const createHandleAddRemoveEvent =
     const evR = emitter[ev](eventName, evCallback);
     return !!evR;
   };
+//! EOF: Helpers - - - - - - - - - -
 
-export class V_Core_Cache {
+export default class V_Core_Cache {
   private clInt: any = null;
   purge: () => Promise<boolean>;
   count: () => Promise<number>;
@@ -56,25 +65,12 @@ export class V_Core_Cache {
   has: (key: CacheItemIdentifier) => Promise<boolean>;
   cleanup: () => Promise<number>;
   keys: () => IterableIterator<any>;
-  size: () => Promise<number>;
-  stats: () => Promise<{
-    hits: number;
-    misses: number;
-    count: number;
-    size: number;
-  }>;
-  statsSync: () => {
-    hits: number;
-    misses: number;
-    count: number;
-    size: number;
-  };
-  purgeStats: () => Promise<{
-    hits: number;
-    misses: number;
-    count: number;
-    size: number;
-  }>;
+  // size: () => Promise<number>;
+  // stats: () => Promise<StatsInterface>;
+  // purgeStats: () => Promise<StatsInterface>;
+  size: () => number;
+  stats: () => StatsInterface;
+  purgeStats: () => StatsInterface;
   values: () => IterableIterator<any>;
   entries: () => IterableIterator<[any, any]>;
 
@@ -105,7 +101,7 @@ export class V_Core_Cache {
 
     const cleanInterval = init.cleanInterval || false;
 
-    let defExp = defineExpire(init.expires) ? init.expires : null;
+    let defExp = defineExpire(init.expires) ? init.expires : undefined;
     let $ = new Map();
 
     //* Cache Items Count
@@ -193,37 +189,26 @@ export class V_Core_Cache {
       return affected;
     };
 
-    //? Size Aproximation
-    this.sizeSync = () =>
+    //? Size Approximation
+    this.size = () =>
       new TextEncoder().encode(JSON.stringify(Array.from($.entries()))).length;
-    this.size = async () => this.sizeSync();
 
     //? Stats
-    //*> ASYNC
-    this.stats = async () => {
+    this.stats = () => {
       return {
         hits: hits,
         misses: miss,
         count: $.size,
-        size: await this.size(),
-      };
-    };
-    //*> SYNC
-    this.statsSync = () => {
-      return {
-        hits: hits,
-        misses: miss,
-        count: $.size,
-        size: this.sizeSync(),
+        size: this.size(),
       };
     };
 
     //? PurgeStats
-    this.purgeStats = async () => {
+    this.purgeStats = () => {
       hits = 0;
       miss = 0;
 
-      let stats = await this.stats();
+      let stats = this.stats();
       emitter.emit("purgeStats", stats);
       return stats;
     };
