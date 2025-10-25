@@ -42,8 +42,6 @@ function attachNewEventEmitter(instance) {
 
 export class V_Core_Cache {
   constructor(init = {}) {
-    // super();
-
     //? Basic Stats for hit/miss when reading data
     let hits = 0
     let miss = 0

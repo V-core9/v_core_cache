@@ -37,6 +37,11 @@ test('cache', async () => {
   expect(await delayCount(550)).toBe(2) // 1550ms after
   expect(await delayCount(1000)).toBe(1) // 2550ms after
 
+  // Should have 0 entries so size can be '{}'
+  expect(await delayCount(1750)).toBe(0)
+  // 2 characters
+  expect(cache.size()).toBe(2)
+
   expect(cache.stopCleanupInterval()).toBe(true)
   expect(cache.stopCleanupInterval()).toBe(false)
 
