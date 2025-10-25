@@ -29,8 +29,7 @@ const cache = createCache()
 ### 1. Get Item Value
 
 ```js
-await cache.get(key) //> anything you put in
-cache.getSync(key)
+cache.get(key)
 ```
 
 ### 2. Get Whole Cache
@@ -46,8 +45,7 @@ cache.getAll() //> object
 Returns the approximate size of the cache in bytes.
 
 ```js
-await cache.size() //> 1507114
-cache.sizeSync()
+cache.size() //> 1507114
 ```
 
 ### 4. Has Item?
@@ -63,8 +61,7 @@ cache.has(key)
 Set/Create/Update an item in the cache. Will overwrite existing item.
 
 ```js
-    await cache.set(key, data, expires?)
-    cache.setSync(key, data, expires?)
+    cache.set(key, data, expires?)
 ```
 
 ### 6. Purge cache
@@ -72,14 +69,13 @@ Set/Create/Update an item in the cache. Will overwrite existing item.
 Returns true if cache was successfully purged. Otherwise, returns false if cache is already empty.
 
 ```js
-await cache.purge()
+cache.purge()
 ```
 
 ### 7. Delete item from cache
 
 ```js
-await cache.del(key) //> true/false
-cache.delSync(key)
+cache.del(key) //> true/false
 ```
 
 ### 8. Stats
@@ -111,7 +107,7 @@ cache.getExpire(key) //> 150123456789 [ Date.now() + expires]
 Returns the number of expired items removed.
 
 ```js
-await cache.cleanup()
+cache.cleanup()
 ```
 
 ### 12. Count Items
@@ -119,8 +115,7 @@ await cache.cleanup()
 Returns the number of items in cache.
 
 ```js
-await cache.count()
-cache.countSync()
+cache.count()
 ```
 
 ---
@@ -159,7 +154,7 @@ cache.pre('set', (data) => console.log(data))
 console.log(cache.eventNames())
 ```
 
-### 5. Remove All Listeners
+### 5. Remove All Listeners by Name
 
 Removes all registered listeners for a single event
 
@@ -167,12 +162,12 @@ Removes all registered listeners for a single event
 cache.removeAllListeners('set')
 ```
 
-### 6. Purge All Listeners
+### 6. Purge All Listeners [by every name]
 
 Removes all registered listeners for all registered events
 
 ```js
-cache.purgeAllListeners()
+cache.removeAllListeners()
 ```
 
 ## Available events
@@ -253,7 +248,7 @@ cache.on('addListener', (data) => console.log(data))
 
 ```js
 const V_Core_Cache = require('v_core_cache')
-const cache = new V_Core_Cache({ cleanInterval: 250 }) // Number in milliseconds
+const cache = new V_Core_Cache({ cleanupIntervalTime: 250 }) // Number in milliseconds
 ```
 
-> **NOTE**: When using autoCleanup you should stop the cleanup interval by calling `cache.stopCleanup()`
+> **NOTE**: When using autoCleanup you should stop the cleanup interval by calling `cache.stopCleanupInterval()`

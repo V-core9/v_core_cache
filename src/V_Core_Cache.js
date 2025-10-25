@@ -1,36 +1,81 @@
 import { isEmpty } from 'v_is_empty_value'
 import { EventEmitter } from 'events'
-import { isAlive, defineExpire, Add_Listener, Remove_Listener, Prepend_Listener, makeEvHandler } from './utils'
+import { isAlive, Add_Listener, Remove_Listener, Prepend_Listener, makeEvHandler } from './utils'
 
 const encodedStringSize = (encString) => new TextEncoder().encode(encString).length
+
+function attachNewEventEmitter(instance) {
+  const emitter = new EventEmitter()
+
+  //? Get list of registered events
+  instance.eventNames = () => emitter.eventNames()
+
+  //? Remove All listeners from event [eventName]
+  instance.removeAllListeners = (evName) => {
+    const eventNamesStart = emitter.eventNames()
+
+    if (typeof evName === 'string') emitter.removeAllListeners(evName)
+
+    if (Array.isArray(evName)) {
+      evName.forEach((eName) => emitter.removeAllListeners(eName))
+    }
+
+    if (typeof evName === 'undefined') {
+      eventNamesStart.forEach((eName) => emitter.removeAllListeners(eName))
+    }
+
+    return eventNamesStart.length - emitter.eventNames().length
+  }
+
+  //* Create Event Listener
+  instance.addListener = makeEvHandler(Add_Listener, emitter)
+  instance.removeListener = makeEvHandler(Remove_Listener, emitter)
+  instance.prependListener = makeEvHandler(Prepend_Listener, emitter)
+
+  //? Aliases
+  instance.on = instance.addListener
+  instance.off = instance.removeListener
+  instance.pre = instance.prependListener
+
+  return emitter
+}
 
 export class V_Core_Cache {
   constructor(init = {}) {
     // super();
 
-    const emitter = new EventEmitter()
-
+    //? Basic Stats for hit/miss when reading data
     let hits = 0
     let miss = 0
 
-    const cleanInterval = init.cleanInterval || false
-    let clInt = null
+    const defaultExpireTime = parseInt(init.expires) || null
+    // Time in MS for the cleanup interval function to run
+    let cleanupIntervalTime = parseInt(init.cleanupIntervalTime) || null
+    // Variable for cleaning interval
+    let cleanupInterval = null
 
-    let defExp = defineExpire(init.expires) ? init.expires : null
+    //! ---------------------------------------
+    //! [ EVENTS ]_____________________________
+
+    const emitter = attachNewEventEmitter(this)
+    //! [ EOF: EVENTS ]________________________
+    //! ---------------------------------------
+
+    // Actual Map as cache space
     let $ = new Map()
 
-    this.entries = $.entries
+    this.entries = () => $.entries()
     this.keys = () => $.keys()
     this.values = () => $.values()
-    this.del = (key) => $.delete(key)
-    this.count = () => $.size
+    this.delete = (key) => $.delete(key)
 
+    this.count = () => $.size
     this.getAll = () => $
 
     this.get = (key) => {
       let data = $.get(key)
 
-      let value = data !== undefined ? data.value : undefined
+      let value = data !== undefined ? data?.value : undefined
 
       emitter.emit('get', { key, value })
 
@@ -48,9 +93,9 @@ export class V_Core_Cache {
       return undefined
     }
 
-    this.getExpire = (key) => ($.has(key) !== false ? $.get(key).exp : undefined)
+    this.getExpire = (key) => $.get(key)?.exp || undefined
 
-    this.set = (key, value, exp = defExp) => {
+    this.set = (key, value, exp = defaultExpireTime) => {
       if (isEmpty(value)) return false
       $.set(key, {
         value: value,
@@ -108,50 +153,28 @@ export class V_Core_Cache {
       return stats
     }
 
-    //* Create Event Listener
-    this.addListener = makeEvHandler(Add_Listener, emitter)
-    this.removeListener = makeEvHandler(Remove_Listener, emitter)
-    this.prependListener = makeEvHandler(Prepend_Listener, emitter)
-
-    //? Aliases
-    this.on = this.addListener
-    this.off = this.removeListener
-    this.pre = this.prependListener
-
     //! End the cleanup interval looping
-    this.stopCleanup = () => {
-      if (clInt === null) return false
+    this.stopCleanupInterval = () => {
+      if (cleanupInterval === null) return false
 
-      clearInterval(clInt)
-      clInt = null
+      clearInterval(cleanupInterval)
+      cleanupInterval = null
       return true
     }
 
-    this.startCleanup = () => {
-      if (clInt !== null) return false
+    this.startCleanup = (clTime) => {
+      if (cleanupInterval !== null) return false
 
-      clInt = setInterval(this.cleanup, cleanInterval)
+      if (typeof clTime === 'number') cleanupIntervalTime = parseInt(clTime)
+
+      if (!cleanupIntervalTime) return false
+
+      cleanupInterval = setInterval(this.cleanup, cleanupIntervalTime)
       return true
-    }
-
-    //? Get list of registered events
-    this.eventNames = () => emitter.eventNames()
-
-    //? Remove All listeners from event [eventName]
-    this.removeAllListeners = emitter.removeAllListeners
-
-    //! Un-Hook ALL EventNames and Listeners
-    this.purgeAllListeners = () => {
-      const eventNames = emitter.eventNames()
-      for (let i = 0; i < eventNames.length; i++) {
-        const evName = eventNames[i]
-        emitter.removeAllListeners(evName)
-      }
-      return this.eventNames().length === 0
     }
 
     //? Start Cleanup Interval if not disabled.
-    if (cleanInterval !== false) this.startCleanup()
+    if (typeof cleanupIntervalTime === 'number') this.startCleanup()
   }
 }
 

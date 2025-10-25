@@ -53,12 +53,12 @@ test('main test', async () => {
   expect(cache.has('test_Del')).toBe(true)
   expect(cache.get('test_Del')).toBe(`D1110`)
 
-  expect(cache.del('test_Del')).toBe(true)
+  expect(cache.delete('test_Del')).toBe(true)
   expect(cache.get('test_Del')).toBe(undefined)
   expect(cache.stats().count).toBe(1)
 
   expect(cache.set('test_Del', `D1110`)).toBe(true)
-  expect(cache.del('test_Del')).toBe(true)
+  expect(cache.delete('test_Del')).toBe(true)
 
   expect(cache.has('test')).toBe(true)
 

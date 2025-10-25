@@ -35,7 +35,8 @@ const purge = (data) => items.purge++
 //? 8.
 const removeListener = (data) => items.removeListener++
 
-test('Testing events', () => {
+const testCacheSetupTestEventListeners = () => {
+  // ADD 8 Events
   testCache.on('addListener', addListener)
   testCache.on('removeListener', removeListener)
   testCache.on('purgeStats', purgeStats)
@@ -44,6 +45,10 @@ test('Testing events', () => {
   testCache.on('get', get)
   testCache.on('hit', hit)
   testCache.on('miss', miss)
+}
+
+test('Testing events', () => {
+  testCacheSetupTestEventListeners()
 
   expect(testCache.stats().count).toBe(0)
 
@@ -98,6 +103,7 @@ test('Testing events', () => {
 
   expect(items.specificEventSet).toBe(125)
 
+  logger('EVENT_NAMES:::', testCache.eventNames())
   expect(testCache.eventNames().length).toBe(9)
   //- - - - - - - - - - - - - - - - - - - - -
   // Test: OFF / Remove Listener - - - - -
@@ -111,6 +117,7 @@ test('Testing events', () => {
   testCache.off('miss', miss)
   testCache.off('removeListener', removeListener)
 
+  logger('EVENT_NAMES:::', testCache.eventNames())
   expect(items.removeListener).toBe(8)
 
   expect(testCache.off(`unknown___key`, removeListener)).toBe(false)
@@ -119,5 +126,14 @@ test('Testing events', () => {
 
   expect(testCache.off(/'XX'/, null)).toBe(false)
 
-  expect(testCache.purgeAllListeners()).toBe(true)
+  expect(testCache.removeAllListeners()).toBe(1)
+  expect(testCache.removeAllListeners()).toBe(0)
+
+  testCacheSetupTestEventListeners()
+  expect(testCache.eventNames().length).toBe(8)
+  expect(testCache.removeAllListeners('addListener')).toBe(1)
+  expect(testCache.removeAllListeners(['set', 'get'])).toBe(2)
+  expect(testCache.eventNames().length).toBe(5)
+  expect(testCache.removeAllListeners()).toBe(5)
+  expect(testCache.removeAllListeners()).toBe(0)
 })

@@ -1,6 +1,6 @@
 const logger = require('../logger')
 const { V_Core_Cache } = require('../../')
-const cache = new V_Core_Cache({ cleanInterval: 100, expires: 10000 })
+const cache = new V_Core_Cache({ cleanupIntervalTime: 100, expires: 10000 })
 
 const delayCount = (delay) => {
   return new Promise((resolve, reject) => {
@@ -37,6 +37,9 @@ test('cache', async () => {
   expect(await delayCount(550)).toBe(2) // 1550ms after
   expect(await delayCount(1000)).toBe(1) // 2550ms after
 
-  expect(cache.stopCleanup()).toBe(true)
-  expect(cache.stopCleanup()).toBe(false)
+  expect(cache.stopCleanupInterval()).toBe(true)
+  expect(cache.stopCleanupInterval()).toBe(false)
+
+  expect(cache.startCleanup(500)).toBe(true)
+  expect(cache.stopCleanupInterval()).toBe(true)
 })

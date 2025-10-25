@@ -95,6 +95,70 @@ module.exports = {
 
   // Run tests from one or more projects
   // projects: undefined,
+  projects: [
+    {
+      displayName: 'cjs',
+      //  testEnvironment: 'node',
+      transform: {},
+      moduleFileExtensions: ['js'],
+      testMatch: ['<rootDir>/__tests__/jest/**/*.js', '<rootDir>/__tests__/jest/*.js'],
+      //  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      // Point to your CJS build
+      moduleNameMapper: {
+        '^my-lib$': '<rootDir>/dist/cjs.js'
+      }
+    },
+    {
+      displayName: 'es',
+      //  testEnvironment: 'node',
+      transform: {},
+      moduleFileExtensions: ['js', 'mjs'],
+      // extensionsToTreatAsEsm: ['.js'],
+      testMatch: ['<rootDir>/__tests__/jest/**/*.js', '<rootDir>/__tests__/jest/*.js'],
+      // extensionsToTreatAsEsm: ['.js'],
+      //  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      // ESM build (if using .mjs or .js with "type":"module")
+      moduleNameMapper: {
+        '^my-lib$': '<rootDir>/dist/es.js'
+      }
+    },
+    {
+      displayName: 'umd',
+      //  testEnvironment: 'jsdom',
+      testMatch: ['<rootDir>/__tests__/jest/**/*.js', '<rootDir>/__tests__/jest/*.js'],
+      //  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      moduleNameMapper: {
+        '^my-lib$': '<rootDir>/dist/umd.js'
+      }
+    },
+    {
+      displayName: 'iife',
+      //  testEnvironment: 'jsdom',
+      testMatch: ['<rootDir>/__tests__/jest/**/*.js', '<rootDir>/__tests__/jest/*.js'],
+      //  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      moduleNameMapper: {
+        '^my-lib$': '<rootDir>/dist/iife.js'
+      }
+    },
+    {
+      displayName: 'amd',
+      //  testEnvironment: 'jsdom',
+      testMatch: ['<rootDir>/__tests__/jest/**/*.js', '<rootDir>/__tests__/jest/*.js'],
+      //  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      moduleNameMapper: {
+        '^my-lib$': '<rootDir>/dist/amd.js'
+      }
+    },
+    {
+      displayName: 'system',
+      //  testEnvironment: 'jsdom',
+      testMatch: ['<rootDir>/__tests__/jest/**/*.js', '<rootDir>/__tests__/jest/*.js'],
+      //  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      moduleNameMapper: {
+        '^my-lib$': '<rootDir>/dist/system.js'
+      }
+    }
+  ],
 
   // Use this configuration option to add custom reporters to Jest
   // reporters: undefined,
@@ -126,7 +190,7 @@ module.exports = {
   // setupFiles: [],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  // setupFilesAfterEnv: [],
+  // //  setupFilesAfterEnv: [],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.
   // slowTestThreshold: 5,
@@ -135,10 +199,10 @@ module.exports = {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  // testEnvironment: "jest-environment-node",
+  // //  testEnvironment: "jest-environment-node",
 
-  // Options that will be passed to the testEnvironment
-  // testEnvironmentOptions: {},
+  // Options that will be passed to the //  testEnvironment
+  // //  testEnvironmentOptions: {},
 
   // Adds a location field to test results
   // testLocationInResults: false,
