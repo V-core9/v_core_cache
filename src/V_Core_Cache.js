@@ -1,6 +1,6 @@
 import { isEmpty } from 'v_is_empty_value'
 import { EventEmitter } from 'events'
-import { isAlive, Add_Listener, Remove_Listener, Prepend_Listener, makeEvHandler } from './utils'
+import { isAlive, Add_Listener, Remove_Listener, Prepend_Listener, createEventHandler } from './utils'
 
 const encodedStringSize = (encString) => new TextEncoder().encode(encString).length
 
@@ -28,9 +28,9 @@ function attachNewEventEmitter(instance) {
   }
 
   //* Create Event Listener
-  instance.addListener = makeEvHandler(Add_Listener, emitter)
-  instance.removeListener = makeEvHandler(Remove_Listener, emitter)
-  instance.prependListener = makeEvHandler(Prepend_Listener, emitter)
+  instance.addListener = createEventHandler(Add_Listener, emitter)
+  instance.removeListener = createEventHandler(Remove_Listener, emitter)
+  instance.prependListener = createEventHandler(Prepend_Listener, emitter)
 
   //? Aliases
   instance.on = instance.addListener
