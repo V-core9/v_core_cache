@@ -56,6 +56,10 @@ export class V_Core_Cache {
     //! [ EVENTS ]_____________________________
 
     const emitter = attachNewEventEmitter(this)
+
+    const maybeEmit = (evName, data) => {
+      if (typeof emitter !== 'undefined') emitter.emit(evName, data)
+    }
     //! [ EOF: EVENTS ]________________________
     //! ---------------------------------------
 
@@ -75,19 +79,19 @@ export class V_Core_Cache {
 
       let value = data !== undefined ? data?.value : undefined
 
-      emitter.emit('get', { key, value })
+      maybeEmit('get', { key, value })
 
       if (value !== undefined) {
         if (isAlive(data.exp)) {
           hits++
-          emitter.emit('hit', { key, value })
+          maybeEmit('hit', { key, value })
           return value
         }
         $.delete(key)
       }
 
       miss++
-      emitter.emit('miss', { key })
+      maybeEmit('miss', { key })
       return undefined
     }
 
@@ -99,8 +103,8 @@ export class V_Core_Cache {
         value: value,
         exp: typeof exp === 'number' ? Date.now() + exp : false
       })
-      emitter.emit('set', { key, value })
-      emitter.emit(`set/${key}`, value)
+      maybeEmit('set', { key, value })
+      maybeEmit(`set/${key}`, value)
       return true
     }
 
@@ -111,13 +115,13 @@ export class V_Core_Cache {
 
     this.purge = () => {
       if ($.size === 0) {
-        emitter.emit('purge', false)
+        maybeEmit('purge', false)
         return false
       }
 
       $.clear()
       let rez = $.size === 0
-      emitter.emit('purge', rez)
+      maybeEmit('purge', rez)
       return rez
     }
 
@@ -129,7 +133,7 @@ export class V_Core_Cache {
           affected++
         }
       }
-      emitter.emit('cleanup', affected)
+      maybeEmit('cleanup', affected)
       return affected
     }
 
@@ -147,7 +151,7 @@ export class V_Core_Cache {
       miss = 0
 
       let stats = this.stats()
-      emitter.emit('purgeStats', stats)
+      maybeEmit('purgeStats', stats)
       return stats
     }
 
