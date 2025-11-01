@@ -55,11 +55,10 @@ export class V_Core_Cache {
     //! ---------------------------------------
     //! [ EVENTS ]_____________________________
 
-    const emitter = attachNewEventEmitter(this)
+    const disableEvents = init.disableEvents || false
+    const emitter = !disableEvents ? attachNewEventEmitter(this) : undefined
+    const maybeEmit = (evName, data) => (!disableEvents ? emitter.emit(evName, data) : null)
 
-    const maybeEmit = (evName, data) => {
-      if (typeof emitter !== 'undefined') emitter.emit(evName, data)
-    }
     //! [ EOF: EVENTS ]________________________
     //! ---------------------------------------
 
